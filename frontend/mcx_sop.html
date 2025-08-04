@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MCX SOP Checklist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Header -->
+  <div class="max-w-4xl mx-auto mb-6 px-4 sm:px-0">
+    <div class="flex flex-col sm:flex-row justify-between items-center bg-white border border-blue-100 rounded-lg shadow-sm p-4">
+      <a href="dashboard.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition duration-200">
+        🏠 Back to Dashboard
+      </a>
+      <span class="mt-2 sm:mt-0 inline-flex items-center bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1 rounded-full border border-blue-200">
+        ⏱️ Last updated: <time datetime="2025-07-23" class="ml-1 font-semibold">July 23, 2025</time>
+      </span>
+    </div>
+  </div>
+
+  <!-- Checklist Container -->
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">📋 MCX SOP Checklist</h1>
+
+    <!-- Collapsible Section: Morning -->
+    <div class="mb-6">
+      <button class="w-full flex justify-between items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-md font-semibold" onclick="toggleSection('morningTasks')">
+        🌅 Morning Tasks
+        <span id="morningIcon">▼</span>
+      </button>
+      <div id="morningTasks" class="mt-3 space-y-2 transition-all duration-300 ease-in-out overflow-hidden">
+        <label class="flex items-center hover:bg-blue-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_cluster_init" data-description="8:45 AM - Cluster initialize should run successfully. Alert on GSpace">
+          8:45 AM - Cluster initialize ( <a href="https://chat.google.com/room/AAAADf6JSAA?cls=7" class="text-blue-500 underline" target="_blank">GSpace</a> )
+        </label>
+        <label class="flex items-center hover:bg-blue-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_ctcl_login" data-description="8:50 AM - CTCL login alert on Teams">
+          8:50 AM - CTCL login alert (Teams)
+        </label>
+        <label class="flex items-center hover:bg-blue-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_eod" data-description="8:55 AM - Perform EOD process">
+          8:55 AM - <a href="http://192.168.0.207:8999/hub/login" target="_blank" class="text-blue-500 underline">EOD Process</a>
+        </label>
+        <label class="flex items-center hover:bg-blue-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_morning_process" data-description="9:00 AM - Morning Process">
+          9:00 AM - Morning Process
+        </label>
+        <label class="flex items-center hover:bg-blue-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_logit_start" data-description="9:05 AM - Logit Started and run 3rd & 6th cell">
+          9:05 AM - Logit Started (run 3rd & 6th cell)
+        </label>
+        <label class="flex items-center hover:bg-blue-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_post_snip" data-description="9:15 AM - Post trade snips">
+          9:15 AM - Post trades snip (every 2-3 hrs) <a href="http://192.168.0.209:3000/public/dashboard/90a71547-d819-4151-a920-4609a2d98132" target="_blank" class="text-blue-500 underline">Dashboard</a>
+        </label>
+      </div>
+    </div>
+
+    <!-- Collapsible Section: Night -->
+    <div class="mb-6">
+      <button class="w-full flex justify-between items-center px-4 py-2 bg-green-100 text-green-800 rounded-md font-semibold" onclick="toggleSection('nightTasks')">
+        🌙 Night Tasks
+        <span id="nightIcon">▼</span>
+      </button>
+      <div id="nightTasks" class="mt-3 space-y-2 transition-all duration-300 ease-in-out overflow-hidden">
+        <label class="flex items-center hover:bg-green-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_exit_start" data-description="10:30 PM - Monitor MCX exits and alerts">
+          10:30 PM - Monitor MCX exits <a href="#" class="text-blue-500 underline">Teams Logs</a>
+        </label>
+        <label class="flex items-center hover:bg-green-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_check_trades" data-description="11:00 PM - Verify trades exited">
+          11:00 PM - Verify trades exit, inform Ashish & Mantraraj
+        </label>
+        <label class="flex items-center hover:bg-green-50 p-2 rounded">
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="mcx_compare_positions" data-description="11:15 PM - Compare positions and share snip">
+          11:15 PM - Compare positions, share snip <a href="http://192.168.0.209:3000/question#..." target="_blank" class="text-blue-500 underline">Metabase</a>
+        </label>
+      </div>
+    </div>
+
+    <!-- Links -->
+    <div class="mb-4 border-t pt-4">
+      <h2 class="text-xl font-semibold mb-2">🔗 Links & Tools</h2>
+      <ul class="list-disc ml-6 text-blue-600 space-y-1">
+        <li><a href="http://192.168.0.207:8999/hub/login" target="_blank">EOD Process</a></li>
+        <li><a href="#" target="_blank">Morning Process</a></li>
+        <li><a href="#" target="_blank">TCS BANCS</a></li>
+        <li><a href="http://192.168.0.155:3333/open-positions" target="_blank">React/CTCL Open Positions</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-sm text-gray-500 mt-8">
+    🎯 You’ve got this! Execute your MCX SOPs like a pro. 🚀
+  </footer>
+
+  <!-- Save Button (Fixed Position) -->
+  <div class="fixed top-4 right-4 z-50">
+    <button 
+      id="saveButton" 
+      onclick="saveProgress()" 
+      class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+      disabled
+    >
+      💾 Save Progress
+    </button>
+  </div>
+
+  <!-- Save Status Modal -->
+  <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-30 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg w-full max-w-sm" id="progressContent">
+      <!-- Message filled by JS -->
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script>
+    // Auth
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    let pendingChanges = new Set();
+    let lockedTasks = new Set();
+    let savedTasks = new Set();
+
+    // Load saved and locked tasks with completion info
+    async function loadTaskStatus() {
+      try {
+        // Get today's activities for this SOP type to show who completed what
+        const allActivities = await api.getTodaySOPActivities('mcx_sop');
+        
+        const activities = await api.getUserSOPActivities('mcx_sop');
+        const completedTaskIds = new Set(activities.map(activity => activity.task_id));
+        
+        // Get locked tasks from other users
+        const progressResponse = await api.getSOPProgress('mcx_sop');
+        lockedTasks = new Set(progressResponse.locked_tasks || []);
+        savedTasks = new Set(completedTaskIds);
+        
+        document.querySelectorAll('.sop-task').forEach(checkbox => {
+          const taskId = checkbox.getAttribute('data-task-id');
+          const label = checkbox.parentElement;
+          
+          if (savedTasks.has(taskId)) {
+            checkbox.checked = true;
+            checkbox.disabled = true;
+            label.classList.add('opacity-75', 'bg-green-100');
+            label.title = 'Task completed and saved';
+          } else if (lockedTasks.has(taskId)) {
+            checkbox.disabled = true;
+            label.classList.add('opacity-50', 'bg-red-100');
+            label.title = 'Task locked by another user';
+          }
+          
+          // Find who completed this task and show completion info
+          const taskActivity = allActivities.find(activity => activity.task_id === taskId);
+          if (taskActivity) {
+            const completedTime = new Date(taskActivity.completed_at).toLocaleString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            // Add completion info
+            const completionInfo = document.createElement('div');
+            completionInfo.className = 'text-xs text-gray-600 mt-1';
+            completionInfo.innerHTML = `✅ Completed by <strong>${taskActivity.username}</strong> at ${completedTime}`;
+            label.appendChild(completionInfo);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load task status:', error);
+      }
+    }
+
+    // Handle checkbox changes
+    document.addEventListener('change', function(event) {
+      if (event.target.classList.contains('sop-task')) {
+        const checkbox = event.target;
+        const taskId = checkbox.getAttribute('data-task-id');
+        
+        if (checkbox.checked) {
+          pendingChanges.add(taskId);
+          checkbox.parentElement.classList.add('bg-yellow-100');
+          checkbox.parentElement.title = 'Pending save';
+        } else {
+          pendingChanges.delete(taskId);
+          checkbox.parentElement.classList.remove('bg-yellow-100');
+          checkbox.parentElement.title = '';
+        }
+        
+        // Enable/disable save button
+        document.getElementById('saveButton').disabled = pendingChanges.size === 0;
+      }
+    });
+
+    // Save progress function
+    async function saveProgress() {
+      if (pendingChanges.size === 0) return;
+      
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      saveButton.textContent = '💾 Saving...';
+      
+      try {
+        const tasksToSave = Array.from(pendingChanges);
+        let successCount = 0;
+        let lockedTasks = [];
+        
+        for (const taskId of tasksToSave) {
+          const checkbox = document.querySelector(`[data-task-id="${taskId}"]`);
+          if (checkbox && checkbox.checked) {
+            const taskDescription = checkbox.getAttribute('data-description');
+            try {
+              await api.logSOPActivity('mcx_sop', taskId, taskDescription);
+              
+              // Lock the task and show completion info
+              checkbox.disabled = true;
+              checkbox.parentElement.classList.remove('bg-yellow-100');
+              checkbox.parentElement.classList.add('opacity-75', 'bg-green-100');
+              checkbox.parentElement.title = 'Task completed and saved';
+              
+              // Add completion info
+              const currentUser = api.getCurrentUser();
+              const now = new Date().toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+              
+              const completionInfo = document.createElement('div');
+              completionInfo.className = 'text-xs text-gray-600 mt-1';
+              completionInfo.innerHTML = `✅ Completed by <strong>${currentUser.username}</strong> at ${now}`;
+              checkbox.parentElement.appendChild(completionInfo);
+              
+              savedTasks.add(taskId);
+              successCount++;
+              
+            } catch (error) {
+              if (error.message.includes('Task locked')) {
+                // Task was locked by another user
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                checkbox.parentElement.classList.remove('bg-yellow-100');
+                checkbox.parentElement.classList.add('opacity-50', 'bg-red-100');
+                checkbox.parentElement.title = 'Task locked by another user';
+                lockedTasks.push(taskId);
+              } else {
+                throw error;
+              }
+            }
+          }
+        }
+        
+        pendingChanges.clear();
+        
+        let message = '';
+        if (successCount > 0 && lockedTasks.length > 0) {
+          message = `✅ ${successCount} task(s) saved. ⚠️ ${lockedTasks.length} task(s) were locked by other users.`;
+        } else if (successCount > 0) {
+          message = `✅ ${successCount} task(s) saved successfully!`;
+        } else if (lockedTasks.length > 0) {
+          message = `⚠️ All selected tasks were locked by other users.`;
+        }
+        
+        showProgressModal(message, successCount > 0 ? 'success' : 'warning');
+        
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+        showProgressModal('❌ Failed to save progress. Please try again.', 'error');
+      } finally {
+        saveButton.disabled = true;
+        saveButton.textContent = '💾 Save Progress';
+      }
+    }
+
+    function showProgressModal(message, type) {
+      const content = document.getElementById('progressContent');
+      let bgColor = 'bg-red-100 text-red-800';
+      if (type === 'success') bgColor = 'bg-green-100 text-green-800';
+      if (type === 'warning') bgColor = 'bg-yellow-100 text-yellow-800';
+      
+      content.innerHTML = `
+        <div class="p-4 rounded-lg ${bgColor}">
+          <p class="text-center font-medium">${message}</p>
+        </div>
+        <div class="mt-4 text-center">
+          <button onclick="hideProgressModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            Close
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('progressModal').classList.remove('hidden');
+      
+      // Auto-hide success messages
+      if (type === 'success') {
+        setTimeout(hideProgressModal, 3000);
+      }
+    }
+
+    function hideProgressModal() {
+      document.getElementById('progressModal').classList.add('hidden');
+    }
+
+    // Toggle collapse
+    function toggleSection(id) {
+      const section = document.getElementById(id);
+      const icon = document.getElementById(id === 'morningTasks' ? 'morningIcon' : 'nightIcon');
+      section.classList.toggle('hidden');
+      icon.textContent = section.classList.contains('hidden') ? '▶' : '▼';
+    }
+
+    // Initialize
+    loadTaskStatus();
+  </script>
+</body>
+</html>

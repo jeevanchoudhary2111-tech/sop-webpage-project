@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lease Line SOP Checklist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-5xl mx-auto py-6 px-4">
+    <!-- Save Button (Fixed Position) -->
+    <div class="fixed top-4 right-4 z-50">
+      <button 
+        id="saveButton" 
+        onclick="saveProgress()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        disabled
+      >
+        💾 Save Progress
+      </button>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+      <a href="dashboard.html" class="text-blue-600 hover:underline font-semibold">🏠 Back to Dashboard</a>
+      <span class="text-sm text-gray-600">⏱️ Last updated: <time datetime="2025-07-22">July 22, 2025</time></span>
+    </div>
+
+    <h1 class="text-3xl font-bold text-blue-700 text-center mb-8">📋 Lease Line SOP Checklist</h1>
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🌅 Morning Tasks</h2>
+      <ul class="space-y-2">
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_connectivity_check" data-description="Check lease line connectivity status"> Check lease line connectivity status</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_bandwidth_monitor" data-description="Monitor bandwidth utilization"> Monitor bandwidth utilization</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_latency_test" data-description="Perform latency tests"> Perform latency tests</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_backup_verify" data-description="Verify backup connections"> Verify backup connections</li>
+      </ul>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🕐 Hourly Monitoring</h2>
+      <ul class="space-y-2">
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_traffic_analysis" data-description="Analyze traffic patterns"> Analyze traffic patterns</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_error_logs" data-description="Check error logs"> Check error logs</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_performance_metrics" data-description="Review performance metrics"> Review performance metrics</li>
+      </ul>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🌙 Evening Tasks</h2>
+      <ul class="space-y-2">
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_daily_report" data-description="Generate daily connectivity report"> Generate daily connectivity report</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_maintenance_schedule" data-description="Review maintenance schedule"> Review maintenance schedule</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="lease_line_capacity_planning" data-description="Update capacity planning metrics"> Update capacity planning metrics</li>
+      </ul>
+    </section>
+
+    <!-- Links -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🔗 Links & Tools</h2>
+      <ul class="list-disc ml-6 text-blue-600 space-y-1">
+        <li><a href="#" target="_blank" class="underline">Network Monitoring Dashboard</a></li>
+        <li><a href="#" target="_blank" class="underline">Bandwidth Utilization Tool</a></li>
+        <li><a href="#" target="_blank" class="underline">Connectivity Test Portal</a></li>
+      </ul>
+    </section>
+
+    <!-- Save Status Modal -->
+    <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-30 hidden items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-lg w-full max-w-sm" id="progressContent">
+        <!-- Message filled by JS -->
+      </div>
+    </div>
+
+  </div> <!-- end of main wrapper -->
+
+  <!-- Footer -->
+  <footer class="text-center text-sm text-gray-500 mt-8 mb-6">
+    🎯 Keep the connections strong! You're doing great! 🚀
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check authentication
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    let pendingChanges = new Set();
+    let lockedTasks = new Set();
+    let savedTasks = new Set();
+
+    // Load saved and locked tasks with completion info
+    async function loadTaskStatus() {
+      try {
+        // Get today's activities for this SOP type to show who completed what
+        const allActivities = await api.getTodaySOPActivities('lease_line_sop');
+        
+        const activities = await api.getUserSOPActivities('lease_line_sop');
+        const completedTaskIds = new Set(activities.map(activity => activity.task_id));
+        
+        // Get locked tasks from other users
+        const progressResponse = await api.getSOPProgress('lease_line_sop');
+        lockedTasks = new Set(progressResponse.locked_tasks || []);
+        savedTasks = new Set(completedTaskIds);
+        
+        document.querySelectorAll('.sop-task').forEach(checkbox => {
+          const taskId = checkbox.getAttribute('data-task-id');
+          const label = checkbox.parentElement;
+          
+          if (savedTasks.has(taskId)) {
+            checkbox.checked = true;
+            checkbox.disabled = true;
+            label.classList.add('opacity-75', 'bg-green-100');
+            label.title = 'Task completed and saved';
+          } else if (lockedTasks.has(taskId)) {
+            checkbox.disabled = true;
+            label.classList.add('opacity-50', 'bg-red-100');
+            label.title = 'Task locked by another user';
+          }
+          
+          // Find who completed this task and show completion info
+          const taskActivity = allActivities.find(activity => activity.task_id === taskId);
+          if (taskActivity) {
+            const completedTime = new Date(taskActivity.completed_at).toLocaleString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            // Add completion info
+            const completionInfo = document.createElement('div');
+            completionInfo.className = 'text-xs text-gray-600 mt-1';
+            completionInfo.innerHTML = `✅ Completed by <strong>${taskActivity.username}</strong> at ${completedTime}`;
+            label.appendChild(completionInfo);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load task status:', error);
+      }
+    }
+
+    // Handle checkbox changes
+    document.addEventListener('change', function(event) {
+      if (event.target.classList.contains('sop-task')) {
+        const checkbox = event.target;
+        const taskId = checkbox.getAttribute('data-task-id');
+        
+        if (checkbox.checked) {
+          pendingChanges.add(taskId);
+          checkbox.parentElement.classList.add('bg-yellow-100');
+          checkbox.parentElement.title = 'Pending save';
+        } else {
+          pendingChanges.delete(taskId);
+          checkbox.parentElement.classList.remove('bg-yellow-100');
+          checkbox.parentElement.title = '';
+        }
+        
+        // Enable/disable save button
+        document.getElementById('saveButton').disabled = pendingChanges.size === 0;
+      }
+    });
+
+    // Save progress function
+    async function saveProgress() {
+      if (pendingChanges.size === 0) return;
+      
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      saveButton.textContent = '💾 Saving...';
+      
+      try {
+        const tasksToSave = Array.from(pendingChanges);
+        let successCount = 0;
+        let lockedTasks = [];
+        
+        for (const taskId of tasksToSave) {
+          const checkbox = document.querySelector(`[data-task-id="${taskId}"]`);
+          if (checkbox && checkbox.checked) {
+            const taskDescription = checkbox.getAttribute('data-description');
+            try {
+              await api.logSOPActivity('lease_line_sop', taskId, taskDescription);
+              
+              // Lock the task and show completion info
+              checkbox.disabled = true;
+              checkbox.parentElement.classList.remove('bg-yellow-100');
+              checkbox.parentElement.classList.add('opacity-75', 'bg-green-100');
+              checkbox.parentElement.title = 'Task completed and saved';
+              
+              // Add completion info
+              const currentUser = api.getCurrentUser();
+              const now = new Date().toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+              
+              const completionInfo = document.createElement('div');
+              completionInfo.className = 'text-xs text-gray-600 mt-1';
+              completionInfo.innerHTML = `✅ Completed by <strong>${currentUser.username}</strong> at ${now}`;
+              checkbox.parentElement.appendChild(completionInfo);
+              
+              savedTasks.add(taskId);
+              successCount++;
+              
+            } catch (error) {
+              if (error.message.includes('Task locked')) {
+                // Task was locked by another user
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                checkbox.parentElement.classList.remove('bg-yellow-100');
+                checkbox.parentElement.classList.add('opacity-50', 'bg-red-100');
+                checkbox.parentElement.title = 'Task locked by another user';
+                lockedTasks.push(taskId);
+              } else {
+                throw error;
+              }
+            }
+          }
+        }
+        
+        pendingChanges.clear();
+        
+        let message = '';
+        if (successCount > 0 && lockedTasks.length > 0) {
+          message = `✅ ${successCount} task(s) saved. ⚠️ ${lockedTasks.length} task(s) were locked by other users.`;
+        } else if (successCount > 0) {
+          message = `✅ ${successCount} task(s) saved successfully!`;
+        } else if (lockedTasks.length > 0) {
+          message = `⚠️ All selected tasks were locked by other users.`;
+        }
+        
+        showProgressModal(message, successCount > 0 ? 'success' : 'warning');
+        
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+        showProgressModal('❌ Failed to save progress. Please try again.', 'error');
+      } finally {
+        saveButton.disabled = true;
+        saveButton.textContent = '💾 Save Progress';
+      }
+    }
+
+    function showProgressModal(message, type) {
+      const content = document.getElementById('progressContent');
+      let bgColor = 'bg-red-100 text-red-800';
+      if (type === 'success') bgColor = 'bg-green-100 text-green-800';
+      if (type === 'warning') bgColor = 'bg-yellow-100 text-yellow-800';
+      
+      content.innerHTML = `
+        <div class="p-4 rounded-lg ${bgColor}">
+          <p class="text-center font-medium">${message}</p>
+        </div>
+        <div class="mt-4 text-center">
+          <button onclick="hideProgressModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            Close
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('progressModal').classList.remove('hidden');
+      
+      // Auto-hide success messages
+      if (type === 'success') {
+        setTimeout(hideProgressModal, 3000);
+      }
+    }
+
+    function hideProgressModal() {
+      document.getElementById('progressModal').classList.add('hidden');
+    }
+
+    // Initialize
+    loadTaskStatus();
+  </script>
+</body>
+</html>

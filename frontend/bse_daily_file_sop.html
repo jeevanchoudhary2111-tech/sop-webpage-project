@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BSE Daily Files Firefighting</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-5xl mx-auto p-6">
+    <!-- Save Button (Fixed Position) -->
+    <div class="fixed top-4 right-4 z-50">
+      <button 
+        id="saveButton" 
+        onclick="saveProgress()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        disabled
+      >
+        💾 Save Progress
+      </button>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+      <a href="dashboard.html" class="text-blue-600 hover:underline font-semibold">🏠 Back to Dashboard</a>
+      <span class="text-sm text-gray-600">⏱️ Last updated: <time datetime="2025-07-22">July 22, 2025</time></span>
+    </div>
+
+    <h1 class="text-4xl font-bold text-blue-700 mb-8 text-center">📂 BSE Daily Files Firefighting SOP</h1>
+
+    <section class="mb-8">
+      <p class="mb-2 text-lg">If files are missing from the FTP server, download them from <a href="https://member.bseindia.com/" target="_blank" class="text-blue-600 underline font-semibold">BSE Extranet</a> and upload to:</p>
+      <pre class="bg-white border-l-4 border-blue-500 rounded p-4 text-sm font-mono overflow-x-auto">scp &lt;path_to_file&gt; monitoring@192.168.0.221:/home/monitoring/bse_daily_files/</pre>
+    </section>
+
+    <section class="mb-6 bg-white rounded shadow p-4">
+      <h2 class="text-lg font-semibold text-blue-700 mb-4">🛠️ Troubleshooting Steps</h2>
+      <ul class="space-y-3">
+        <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="bse_identify_failed_dag" data-description="Identify the failed DAG node">Identify the failed DAG node</label></li>
+        <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="bse_refer_table" data-description="Refer to the appropriate table below to find the correct file">Refer to the appropriate table below to find the correct file</label></li>
+        <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="bse_download_unzip" data-description="Download and unzip the file locally">Download and unzip the file locally</label></li>
+        <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="bse_upload_scp" data-description="Upload to /home/monitoring/bse_daily_files/ using the SCP command above">Upload to <code>/home/monitoring/bse_daily_files/</code> using the SCP command above</label></li>
+        <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="bse_retrigger_dag" data-description="Retrigger bse_minio_uploads DAG if needed">Retrigger <a href="http://192.168.0.214:18080/code?dag_id=bse_minio_uploads" class="text-blue-600 underline ml-1">bse_minio_uploads</a> DAG if needed</label></li>
+      </ul>
+    </section>
+
+    <section class="mb-6 bg-white rounded shadow p-4">
+      <h2 class="text-lg font-semibold text-blue-700 mb-4">📥 bse_daily_downloads DAG</h2>
+      <p>Triggered at <b>11:30 PM (yesterday)</b>. Use the yesterday folder on BSE Extranet.</p>
+      <p class="text-blue-600 mt-1"><a href="http://192.168.0.214:18080/code?dag_id=bse_daily_downloads" target="_blank">View DAG</a></p>
+      <div class="overflow-x-auto mt-4">
+        <table class="table-auto w-full text-sm border border-gray-300">
+          <thead class="bg-blue-100">
+            <tr>
+              <th class="border px-3 py-2">Node Name</th>
+              <th class="border px-3 py-2">Extranet File Path</th>
+              <th class="border px-3 py-2">Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="hover:bg-gray-50"><td class="border px-3 py-2">FNO_Contract</td><td class="border px-3 py-2">FNO/Common/{month_name}-{year}/{yesterday_date}-{month_number}-{year}/</td><td class="border px-3 py-2">BSE_EQD_CONTRACT_09122024.csv</td></tr>
+            <tr class="hover:bg-gray-50"><td class="border px-3 py-2">EQ_Security</td><td class="border px-3 py-2">EQ/Common/{...}</td><td class="border px-3 py-2">BSE_EQ_SCRIP_09122024.csv</td></tr>
+            <tr class="hover:bg-gray-50"><td class="border px-3 py-2">EQ_Bhav</td><td class="border px-3 py-2">EQ/Common/{...}</td><td class="border px-3 py-2">BhavCopy_BSE_CM_0_0_0_20241209_F_0000.csv</td></tr>
+            <tr class="hover:bg-gray-50"><td class="border px-3 py-2">FO_Bhav</td><td class="border px-3 py-2">FNO/Common/{...}</td><td class="border px-3 py-2">BhavCopy_BSE_FO_0_0_0_20241209_F_0000.csv</td></tr>
+            <tr class="hover:bg-gray-50"><td class="border px-3 py-2">Circuit_Pro</td><td class="border px-3 py-2">EQ/Common/{...}</td><td class="border px-3 py-2">DP101224</td></tr>
+            <tr class="hover:bg-gray-50"><td class="border px-3 py-2">Exposure_margin</td><td class="border px-3 py-2">FNO/Common/{...}</td><td class="border px-3 py-2">ICCL_EDXELM101224.csv</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="mb-6 bg-white rounded shadow p-4">
+      <h2 class="text-lg font-semibold text-blue-700 mb-4">📤 bse_margin_processing DAG</h2>
+      <p>Triggered <b>today at 6:30 AM</b>. Files are taken from today's folder except <b>Var_File_00</b> which is from yesterday’s.</p>
+      <p class="text-blue-600 mt-1"><a href="http://192.168.0.214:18080/code?dag_id=bse_margin_processing" target="_blank">View DAG</a></p>
+    </section>
+
+    <section class="mb-6 bg-white rounded shadow p-4">
+      <h2 class="text-lg font-semibold text-blue-700 mb-4">📦 bse_minio_uploads DAG Mapping</h2>
+      <p>Mapping from <em>bse_daily_downloads</em> nodes to <em>bse_minio_uploads</em> failure nodes:</p>
+      <ul class="list-disc ml-6 mt-2 space-y-1">
+        <li><b>circuit_upload</b>: Circuit_Pro</li>
+        <li><b>eq_bhav_upload</b>: EQ_Bhav</li>
+        <li><b>fo_bhav_upload</b>: FO_Bhav</li>
+        <li><b>segment_mapping</b>: EQ_Security</li>
+        <li><b>contract_file / lotsize / mklots</b>: FNO_Contract</li>
+        <li><b>security_file</b>: EQ_Security</li>
+        <li><b>exposure_margin</b>: Exposure_margin</li>
+        <li><b>symboltoken_map</b>: Circuit_Pro, EQ_Security, etc.</li>
+      </ul>
+    </section>
+
+    <footer class="text-center text-gray-500 text-sm mt-12">
+      🧠 You're doing great—keep those BSE files flowing! 📈
+    </footer>
+
+    <!-- Progress Status Modal -->
+    <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Save Progress</h3>
+            <button onclick="hideProgressModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div id="progressContent">
+            <!-- Progress content will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check authentication
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    let pendingChanges = new Set();
+    let lockedTasks = new Set();
+    let savedTasks = new Set();
+
+    // Load saved and locked tasks with completion info
+    async function loadTaskStatus() {
+      try {
+        // Get today's activities for this SOP type to show who completed what
+        const allActivities = await api.getTodaySOPActivities('bse_daily_files_sop');
+        
+        const activities = await api.getUserSOPActivities('bse_daily_files_sop');
+        const completedTaskIds = new Set(activities.map(activity => activity.task_id));
+        
+        // Get locked tasks from other users
+        const progressResponse = await api.getSOPProgress('bse_daily_files_sop');
+        lockedTasks = new Set(progressResponse.locked_tasks || []);
+        savedTasks = new Set(completedTaskIds);
+        
+        document.querySelectorAll('.sop-task').forEach(checkbox => {
+          const taskId = checkbox.getAttribute('data-task-id');
+          const label = checkbox.parentElement;
+          
+          if (savedTasks.has(taskId)) {
+            checkbox.checked = true;
+            checkbox.disabled = true;
+            label.classList.add('opacity-75', 'bg-green-100');
+            label.title = 'Task completed and saved';
+          } else if (lockedTasks.has(taskId)) {
+            checkbox.disabled = true;
+            label.classList.add('opacity-50', 'bg-red-100');
+            label.title = 'Task locked by another user';
+          }
+
+          // Find who completed this task and show completion info
+          const taskActivity = allActivities.find(activity => activity.task_id === taskId);
+          if (taskActivity) {
+            const completedTime = new Date(taskActivity.completed_at).toLocaleString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            // Add completion info
+            const completionInfo = document.createElement('div');
+            completionInfo.className = 'text-xs text-gray-600 mt-1';
+            completionInfo.innerHTML = `✅ Completed by <strong>${taskActivity.username}</strong> at ${completedTime}`;
+            label.appendChild(completionInfo);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load task status:', error);
+      }
+    }
+
+    // Handle checkbox changes
+    document.addEventListener('change', function(event) {
+      if (event.target.classList.contains('sop-task')) {
+        const checkbox = event.target;
+        const taskId = checkbox.getAttribute('data-task-id');
+        
+        if (checkbox.checked) {
+          pendingChanges.add(taskId);
+          checkbox.parentElement.classList.add('bg-yellow-100');
+          checkbox.parentElement.title = 'Pending save';
+        } else {
+          pendingChanges.delete(taskId);
+          checkbox.parentElement.classList.remove('bg-yellow-100');
+          checkbox.parentElement.title = '';
+        }
+        
+        // Enable/disable save button
+        document.getElementById('saveButton').disabled = pendingChanges.size === 0;
+      }
+    });
+
+    // Save progress function
+    async function saveProgress() {
+      if (pendingChanges.size === 0) return;
+      
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      saveButton.textContent = '💾 Saving...';
+      
+      try {
+        const tasksToSave = Array.from(pendingChanges);
+        
+        for (const taskId of tasksToSave) {
+          const checkbox = document.querySelector(`[data-task-id="${taskId}"]`);
+          if (checkbox && checkbox.checked) {
+            const taskDescription = checkbox.getAttribute('data-description');
+            await api.logSOPActivity('bse_daily_files_sop', taskId, taskDescription);
+            
+            // Lock the task
+            checkbox.disabled = true;
+            checkbox.parentElement.classList.remove('bg-yellow-100');
+            checkbox.parentElement.classList.add('opacity-75', 'bg-green-100');
+            checkbox.parentElement.title = 'Task completed and saved';
+            savedTasks.add(taskId);
+          }
+        }
+        
+        pendingChanges.clear();
+        showProgressModal('✅ Progress saved successfully!', 'success');
+        
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+        showProgressModal('❌ Failed to save progress. Please try again.', 'error');
+      } finally {
+        saveButton.disabled = true;
+        saveButton.textContent = '💾 Save Progress';
+      }
+    }
+
+    function showProgressModal(message, type) {
+      const content = document.getElementById('progressContent');
+      const bgColor = type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+      
+      content.innerHTML = `
+        <div class="p-4 rounded-lg ${bgColor}">
+          <p class="text-center font-medium">${message}</p>
+        </div>
+        <div class="mt-4 text-center">
+          <button onclick="hideProgressModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            Close
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('progressModal').classList.remove('hidden');
+      
+      // Auto-hide success messages
+      if (type === 'success') {
+        setTimeout(hideProgressModal, 2000);
+      }
+    }
+
+    function hideProgressModal() {
+      document.getElementById('progressModal').classList.add('hidden');
+    }
+
+    // Initialize
+    loadTaskStatus();
+  </script>
+</body>
+</html>

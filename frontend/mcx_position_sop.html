@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MCX Position Matching SOP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-5xl mx-auto py-6 px-4">
+    <!-- Save Button (Fixed Position) -->
+    <div class="fixed top-4 right-4 z-50">
+      <button 
+        id="saveButton" 
+        onclick="saveProgress()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        disabled
+      >
+        💾 Save Progress
+      </button>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+      <a href="dashboard.html" class="text-blue-600 hover:underline font-semibold">🏠 Back to Dashboard</a>
+      <span class="text-sm text-gray-600">⏱️ Last updated: <time datetime="2025-07-22">July 22, 2025</time></span>
+    </div>
+
+    <h1 class="text-3xl font-bold text-blue-700 text-center mb-8">📸 MCX Position Matching SOP</h1>
+
+    <!-- Pre-9:30 Checks -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">✅ Logit Status</h2>
+      <ul class="space-y-2">
+        <li>
+          <label class="flex items-center p-2 rounded-lg transition-colors duration-200">
+            <input type="checkbox" class="mr-3 sop-task" data-task-id="logit_ledger_completed" data-description="Logit Ledger Completed"> 
+            Logit Ledger Completed
+            <span class="completion-info ml-auto text-xs text-gray-500"></span>
+          </label>
+        </li>
+        <li>
+          <label class="flex items-center p-2 rounded-lg transition-colors duration-200">
+            <input type="checkbox" class="mr-3 sop-task" data-task-id="logit_started" data-description="Logit Started"> 
+            Logit Started
+            <span class="completion-info ml-auto text-xs text-gray-500"></span>
+          </label>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Snapshot Timing Table -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🕒 Snapshot Checks</h2>
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full text-sm border border-gray-300">
+          <thead class="bg-blue-100">
+            <tr>
+              <th class="border px-3 py-2">Time</th>
+              <th class="border px-3 py-2">OMS</th>
+              <th class="border px-3 py-2">Live Sheet</th>
+              <th class="border px-3 py-2">CTCL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Time rows -->
+<tr>
+  <td class="border px-3 py-2">9:30 AM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_930" class="mr-1 sop-task" data-task-id="oms_930_match" data-description="OMS 9:30 AM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_930" class="mr-1 sop-task" data-task-id="oms_930_unmatch" data-description="OMS 9:30 AM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_930" class="mr-1 sop-task" data-task-id="live_930_match" data-description="Live Sheet 9:30 AM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_930" class="mr-1 sop-task" data-task-id="live_930_unmatch" data-description="Live Sheet 9:30 AM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_930" class="mr-1 sop-task" data-task-id="ctcl_930_match" data-description="CTCL 9:30 AM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_930" class="mr-1 sop-task" data-task-id="ctcl_930_unmatch" data-description="CTCL 9:30 AM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+<tr>
+  <td class="border px-3 py-2">11:30 AM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_1130" class="mr-1 sop-task" data-task-id="oms_1130_match" data-description="OMS 11:30 AM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_1130" class="mr-1 sop-task" data-task-id="oms_1130_unmatch" data-description="OMS 11:30 AM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_1130" class="mr-1 sop-task" data-task-id="live_1130_match" data-description="Live Sheet 11:30 AM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_1130" class="mr-1 sop-task" data-task-id="live_1130_unmatch" data-description="Live Sheet 11:30 AM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_1130" class="mr-1 sop-task" data-task-id="ctcl_1130_match" data-description="CTCL 11:30 AM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_1130" class="mr-1 sop-task" data-task-id="ctcl_1130_unmatch" data-description="CTCL 11:30 AM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+<tr>
+  <td class="border px-3 py-2">1:30 PM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_1330" class="mr-1 sop-task" data-task-id="oms_1330_match" data-description="OMS 1:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_1330" class="mr-1 sop-task" data-task-id="oms_1330_unmatch" data-description="OMS 1:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_1330" class="mr-1 sop-task" data-task-id="live_1330_match" data-description="Live Sheet 1:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_1330" class="mr-1 sop-task" data-task-id="live_1330_unmatch" data-description="Live Sheet 1:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_1330" class="mr-1 sop-task" data-task-id="ctcl_1330_match" data-description="CTCL 1:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_1330" class="mr-1 sop-task" data-task-id="ctcl_1330_unmatch" data-description="CTCL 1:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+<tr>
+  <td class="border px-3 py-2">3:30 PM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_1530" class="mr-1 sop-task" data-task-id="oms_1530_match" data-description="OMS 3:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_1530" class="mr-1 sop-task" data-task-id="oms_1530_unmatch" data-description="OMS 3:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_1530" class="mr-1 sop-task" data-task-id="live_1530_match" data-description="Live Sheet 3:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_1530" class="mr-1 sop-task" data-task-id="live_1530_unmatch" data-description="Live Sheet 3:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_1530" class="mr-1 sop-task" data-task-id="ctcl_1530_match" data-description="CTCL 3:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_1530" class="mr-1 sop-task" data-task-id="ctcl_1530_unmatch" data-description="CTCL 3:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+<tr>
+  <td class="border px-3 py-2">5:30 PM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_1730" class="mr-1 sop-task" data-task-id="oms_1730_match" data-description="OMS 5:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_1730" class="mr-1 sop-task" data-task-id="oms_1730_unmatch" data-description="OMS 5:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_1730" class="mr-1 sop-task" data-task-id="live_1730_match" data-description="Live Sheet 5:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_1730" class="mr-1 sop-task" data-task-id="live_1730_unmatch" data-description="Live Sheet 5:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_1730" class="mr-1 sop-task" data-task-id="ctcl_1730_match" data-description="CTCL 5:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_1730" class="mr-1 sop-task" data-task-id="ctcl_1730_unmatch" data-description="CTCL 5:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+<tr>
+  <td class="border px-3 py-2">7:30 PM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_1930" class="mr-1 sop-task" data-task-id="oms_1930_match" data-description="OMS 7:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_1930" class="mr-1 sop-task" data-task-id="oms_1930_unmatch" data-description="OMS 7:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_1930" class="mr-1 sop-task" data-task-id="live_1930_match" data-description="Live Sheet 7:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_1930" class="mr-1 sop-task" data-task-id="live_1930_unmatch" data-description="Live Sheet 7:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_1930" class="mr-1 sop-task" data-task-id="ctcl_1930_match" data-description="CTCL 7:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_1930" class="mr-1 sop-task" data-task-id="ctcl_1930_unmatch" data-description="CTCL 7:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+<tr>
+  <td class="border px-3 py-2">9:30 PM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_2130" class="mr-1 sop-task" data-task-id="oms_2130_match" data-description="OMS 9:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_2130" class="mr-1 sop-task" data-task-id="oms_2130_unmatch" data-description="OMS 9:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_2130" class="mr-1 sop-task" data-task-id="live_2130_match" data-description="Live Sheet 9:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_2130" class="mr-1 sop-task" data-task-id="live_2130_unmatch" data-description="Live Sheet 9:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_2130" class="mr-1 sop-task" data-task-id="ctcl_2130_match" data-description="CTCL 9:30 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_2130" class="mr-1 sop-task" data-task-id="ctcl_2130_unmatch" data-description="CTCL 9:30 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+<tr>
+  <td class="border px-3 py-2">11:00 PM</td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="oms_2300" class="mr-1 sop-task" data-task-id="oms_2300_match" data-description="OMS 11:00 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="oms_2300" class="mr-1 sop-task" data-task-id="oms_2300_unmatch" data-description="OMS 11:00 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="live_2300" class="mr-1 sop-task" data-task-id="live_2300_match" data-description="Live Sheet 11:00 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="live_2300" class="mr-1 sop-task" data-task-id="live_2300_unmatch" data-description="Live Sheet 11:00 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+  <td class="border px-3 py-2">
+    <label class="flex items-center">
+      <input type="radio" name="ctcl_2300" class="mr-1 sop-task" data-task-id="ctcl_2300_match" data-description="CTCL 11:00 PM Match">Match
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+    <label class="flex items-center ml-2">
+      <input type="radio" name="ctcl_2300" class="mr-1 sop-task" data-task-id="ctcl_2300_unmatch" data-description="CTCL 11:00 PM Unmatch">Unmatch
+      <span class="completion-info ml-auto text-xs text-gray-500"></span>
+    </label>
+  </td>
+</tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Final Position Check -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Final Position Match</h2>
+      <label class="flex items-center p-2 rounded-lg transition-colors duration-200">
+        <input type="checkbox" class="mr-3 sop-task" data-task-id="final_position_match" data-description="Position matched with TCSbancs"> 
+        Position matched with <b>TCSbancs</b>
+        <span class="completion-info ml-auto text-xs text-gray-500"></span>
+      </label>
+    </section>
+
+    <!-- Note Section -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">📝 Notes / Incident Log</h2>
+      <textarea rows="5" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Leave a note here if any incident or mismatch occurred during the checks..."></textarea>
+    </section>
+
+    <footer class="text-center text-sm text-gray-500 mt-8">
+      🧾 Stay sharp and cross-verify position diligently! ✅
+    </footer>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check authentication
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    let pendingChanges = new Set();
+    let lockedTasks = new Set();
+    let savedTasks = new Set();
+
+    // Load saved and locked tasks with completion info
+    async function loadTaskStatus() {
+      try {
+        // Get today's activities for this SOP type to show who completed what
+        const allActivities = await api.getTodaySOPActivities('mcx_position_sop');
+        
+        const activities = await api.getUserSOPActivities('mcx_position_sop');
+        const completedTaskIds = new Set(activities.map(activity => activity.task_id));
+        
+        // Get locked tasks from other users
+        const progressResponse = await api.getSOPProgress('mcx_position_sop');
+        lockedTasks = new Set(progressResponse.locked_tasks || []);
+        savedTasks = new Set(completedTaskIds);
+        
+        document.querySelectorAll('.sop-task').forEach(input => {
+          const taskId = input.getAttribute('data-task-id');
+          const label = input.parentElement;
+          const completionInfo = label.querySelector('.completion-info');
+          
+          if (savedTasks.has(taskId)) {
+            input.checked = true;
+            input.disabled = true;
+            label.classList.add('opacity-75', 'bg-green-100');
+            label.title = 'Task completed and saved';
+            
+            // Show who completed it and when
+            const activity = allActivities.find(a => a.task_id === taskId);
+            if (activity && completionInfo) {
+              const completedTime = new Date(activity.completed_at).toLocaleString();
+              completionInfo.textContent = `✓ ${activity.username} at ${completedTime}`;
+            }
+          } else if (lockedTasks.has(taskId)) {
+            input.disabled = true;
+            label.classList.add('opacity-50', 'bg-red-100');
+            label.title = 'Task locked by another user';
+            
+            // Show who locked it
+            const activity = allActivities.find(a => a.task_id === taskId);
+            if (activity && completionInfo) {
+              const completedTime = new Date(activity.completed_at).toLocaleString();
+              completionInfo.textContent = `🔒 ${activity.username} at ${completedTime}`;
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load task status:', error);
+      }
+    }
+
+    // Handle checkbox and radio button changes
+    document.addEventListener('change', function(event) {
+      if (event.target.classList.contains('sop-task')) {
+        const input = event.target;
+        const taskId = input.getAttribute('data-task-id');
+        
+        if (input.checked || input.type === 'radio') {
+          pendingChanges.add(taskId);
+          input.parentElement.classList.add('bg-yellow-100');
+          input.parentElement.title = 'Pending save';
+        } else {
+          pendingChanges.delete(taskId);
+          input.parentElement.classList.remove('bg-yellow-100');
+          input.parentElement.title = '';
+        }
+        
+        // Enable/disable save button
+        document.getElementById('saveButton').disabled = pendingChanges.size === 0;
+      }
+    });
+
+    // Save progress function
+    async function saveProgress() {
+      if (pendingChanges.size === 0) return;
+      
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      saveButton.textContent = '💾 Saving...';
+      
+      try {
+        const tasksToSave = Array.from(pendingChanges);
+        
+        for (const taskId of tasksToSave) {
+          const input = document.querySelector(`[data-task-id="${taskId}"]`);
+          if (input && (input.checked || input.type === 'radio')) {
+            const taskDescription = input.getAttribute('data-description');
+            await api.logSOPActivity('mcx_position_sop', taskId, taskDescription);
+            
+            // Lock the task
+            input.disabled = true;
+            input.parentElement.classList.remove('bg-yellow-100');
+            input.parentElement.classList.add('opacity-75', 'bg-green-100');
+            input.parentElement.title = 'Task completed and saved';
+            
+            // Show completion info
+            const completionInfo = input.parentElement.querySelector('.completion-info');
+            if (completionInfo) {
+              const now = new Date().toLocaleString();
+              const username = api.getCurrentUser()?.username || 'You';
+              completionInfo.textContent = `✓ ${username} at ${now}`;
+            }
+          }
+        }
+        
+        pendingChanges.clear();
+        saveButton.textContent = '✅ Saved!';
+        
+        setTimeout(() => {
+          saveButton.textContent = '💾 Save Progress';
+          saveButton.disabled = true;
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+        alert('Failed to save progress. Please try again.');
+        saveButton.disabled = false;
+        saveButton.textContent = '💾 Save Progress';
+      }
+    }
+
+    // Initialize
+    loadTaskStatus();
+  </script>
+</body>
+</html>

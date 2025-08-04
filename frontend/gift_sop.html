@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GIFT SOP Checklist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-5xl mx-auto py-6 px-4">
+    <!-- Save Button (Fixed Position) -->
+    <div class="fixed top-4 right-4 z-50">
+      <button 
+        id="saveButton" 
+        onclick="saveProgress()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        disabled
+      >
+        💾 Save Progress
+      </button>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+      <a href="dashboard.html" class="text-blue-600 hover:underline font-semibold">🏠 Back to Dashboard</a>
+      <span class="text-sm text-gray-600">⏱️ Last updated: <time datetime="2025-07-22">July 22, 2025</time></span>
+    </div>
+
+    <h1 class="text-3xl font-bold text-blue-700 text-center mb-8">📋 GIFT SOP Checklist</h1>
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🕒 Daily Runs</h2>
+      <ul class="space-y-2">
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_daily_315am" data-description="DAG: gift_daily_data_appends ran at 3:15 am on 192.168.0.121:8083"> DAG: <b>gift_daily_data_appends</b> ran at 3:15 am on <b>192.168.0.121:8083</b></li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_daily_515am" data-description="DAG: gift_daily_data_appends ran at 5:15 am"> DAG: <b>gift_daily_data_appends</b> ran at 5:15 am</li>
+      </ul>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🕕 6:00 AM Tasks</h2>
+      <ul class="space-y-2">
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_prod_init" data-description="GIFT Production Module initialized alert received on Google Space"> GIFT Production Module initialized alert received on Google Space</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_no_strategy_removal" data-description="No unexpected strategy removal logs present on Google Space"> No unexpected strategy removal logs present on Google Space</li>
+      </ul>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🕡 6:30 AM Tasks</h2>
+      <ul class="space-y-2">
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_start_datasnap" data-description="3 nodes of startDatasnap DAG running (Airflow: 192.168.30.15:18080)"> 3 nodes of <b>startDatasnap</b> DAG running (Airflow: 192.168.30.15:18080)</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_start_scripts" data-description="2 nodes of start_scripts DAG running"> 2 nodes of <b>start_scripts</b> DAG running</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_trader_login" data-description="TraderID 398 login alert on 192.168.30.15 received on Teams"> ⚠️ TraderID 398 login alert on 192.168.30.15 received on Teams</li>
+        <li><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_grafana_check" data-description="Check Grafana: Time difference should be ~3hrs"> 📊 Check Grafana: Time difference should be ~3hrs</li>
+      </ul>
+    </section>
+
+    <!-- Section: 4:30 PM Tasks -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🕟 4:30 PM Tasks</h2>
+      <ul class="space-y-2">
+        <li>
+          <input type="checkbox" class="mr-2 sop-task" data-task-id="gift_trader_login_pm" data-description="TraderID 398 login alert on 192.168.30.15 received on Teams (4:30 PM)"> 
+          ⚠️ TraderID 398 login alert on 192.168.30.15 received on Teams
+        </li>
+      </ul>
+    </section>
+
+    <!-- Section: Alerts -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">⚠️ Alert Handling</h2>
+      <ul class="list-disc ml-6 space-y-2 text-gray-700">
+        <li>Ignore “Gift Execution Alert: ERROR, Connection with CTCL lost” between 3:15 am and 6:30 am</li>
+        <li>Receive NewOrderLogs and ExecutionLogs on Teams — validate trading</li>
+        <li>Ignore GIFT Datasnap alerts, but monitor other alerts on the Teams channel</li>
+        <li>Alert if <b>{'FUTIDX_GIFT'}</b> segment trades are missing in last 24 hrs — should show on Google Space</li>
+      </ul>
+    </section>
+
+    <!-- Section: Links -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🔗 Links & Tools</h2>
+      <ul class="list-disc ml-6 text-blue-600 space-y-1">
+        <li>Airflow (gift): <a href="http://192.168.0.121:8083" target="_blank" class="underline">192.168.0.121:8083</a></li>
+        <li>Airflow (startDatasnap): <a href="http://192.168.30.15:18080" target="_blank" class="underline">192.168.30.15:18080</a></li>
+        <li>Airflow (Balte): <a href="http://192.168.30.15:8099" target="_blank" class="underline">192.168.30.15:8099</a></li>
+        <li>📨 Google Spaces: <a href="#" target="_blank" class="underline">Gspace</a></li>
+      </ul>
+    </section>
+
+    <!-- Save Status Modal -->
+    <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-30 hidden items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-lg w-full max-w-sm" id="progressContent">
+        <!-- Message filled by JS -->
+      </div>
+    </div>
+
+  </div> <!-- end of main wrapper -->
+
+  <!-- Footer -->
+  <footer class="text-center text-sm text-gray-500 mt-8 mb-6">
+    🎯 You're doing great! Keep crushing your SOPs like a pro! 🚀
+  </footer>
+</body>
+</html>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check authentication
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    let pendingChanges = new Set();
+    let lockedTasks = new Set();
+    let savedTasks = new Set();
+
+    // Load saved and locked tasks with completion info
+    async function loadTaskStatus() {
+      try {
+        // Get today's activities for this SOP type to show who completed what
+        const allActivities = await api.getTodaySOPActivities('gift_sop');
+
+        const activities = await api.getUserSOPActivities('gift_sop');
+        const completedTaskIds = new Set(activities.map(activity => activity.task_id));
+
+        // Get locked tasks from other users
+        const progressResponse = await api.getSOPProgress('gift_sop');
+        lockedTasks = new Set(progressResponse.locked_tasks || []);
+        savedTasks = new Set(completedTaskIds);
+
+        document.querySelectorAll('.sop-task').forEach(checkbox => {
+          const taskId = checkbox.getAttribute('data-task-id');
+          const label = checkbox.parentElement;
+
+          if (savedTasks.has(taskId)) {
+            checkbox.checked = true;
+            checkbox.disabled = true;
+            label.classList.add('opacity-75', 'bg-green-100');
+            label.title = 'Task completed and saved';
+          } else if (lockedTasks.has(taskId)) {
+            checkbox.disabled = true;
+            label.classList.add('opacity-50', 'bg-red-100');
+            label.title = 'Task locked by another user';
+          }
+
+          // Find who completed this task and show completion info
+          const taskActivity = allActivities.find(activity => activity.task_id === taskId);
+          if (taskActivity) {
+            const completedTime = new Date(taskActivity.completed_at).toLocaleString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            // Add completion info
+            const completionInfo = document.createElement('div');
+            completionInfo.className = 'text-xs text-gray-600 mt-1';
+            completionInfo.innerHTML = `✅ Completed by <strong>${taskActivity.username}</strong> at ${completedTime}`;
+            label.appendChild(completionInfo);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load task status:', error);
+      }
+    }
+
+    // Handle checkbox changes
+    document.addEventListener('change', function(event) {
+      if (event.target.classList.contains('sop-task')) {
+        const checkbox = event.target;
+        const taskId = checkbox.getAttribute('data-task-id');
+
+        if (checkbox.checked) {
+          pendingChanges.add(taskId);
+          checkbox.parentElement.classList.add('bg-yellow-100');
+          checkbox.parentElement.title = 'Pending save';
+        } else {
+          pendingChanges.delete(taskId);
+          checkbox.parentElement.classList.remove('bg-yellow-100');
+          checkbox.parentElement.title = '';
+        }
+
+        // Enable/disable save button
+        document.getElementById('saveButton').disabled = pendingChanges.size === 0;
+      }
+    });
+
+    // Save progress function
+    async function saveProgress() {
+      if (pendingChanges.size === 0) return;
+
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      saveButton.textContent = '💾 Saving...';
+
+      try {
+        const tasksToSave = Array.from(pendingChanges);
+        let successCount = 0;
+
+        for (const taskId of tasksToSave) {
+          const checkbox = document.querySelector(`[data-task-id="${taskId}"]`);
+          if (checkbox && checkbox.checked) {
+            const taskDescription = checkbox.getAttribute('data-description');
+            await api.logSOPActivity('gift_sop', taskId, taskDescription);
+
+            // Add username and timestamp display
+            const currentUser = api.getCurrentUser();
+            const now = new Date().toLocaleString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            // Add completion info
+            const completionInfo = document.createElement('div');
+            completionInfo.className = 'text-xs text-gray-600 mt-1';
+            completionInfo.innerHTML = `✅ Completed by <strong>${currentUser.username}</strong> at ${now}`;
+            checkbox.parentElement.appendChild(completionInfo);
+
+            // Lock the task
+            checkbox.disabled = true;
+            checkbox.parentElement.classList.remove('bg-yellow-100');
+            checkbox.parentElement.classList.add('opacity-75', 'bg-green-100');
+            checkbox.parentElement.title = 'Task completed and saved';
+            savedTasks.add(taskId);
+            successCount++;
+          }
+        }
+
+        pendingChanges.clear();
+        
+        // Just show success in button text, no popup
+        saveButton.textContent = `✅ Saved ${successCount} tasks!`;
+        setTimeout(() => {
+          saveButton.textContent = '💾 Save Progress';
+        }, 2000);
+
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+        saveButton.textContent = '❌ Save Failed';
+        setTimeout(() => {
+          saveButton.textContent = '💾 Save Progress';
+          saveButton.disabled = false;
+        }, 2000);
+      }
+    }
+
+    function showProgressModal(message, type) {
+      const content = document.getElementById('progressContent');
+      const bgColor = type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+      content.innerHTML = `
+        <div class="p-4 rounded-lg ${bgColor}">
+          <p class="text-center font-medium">${message}</p>
+        </div>
+        <div class="mt-4 text-center">
+          <button onclick="hideProgressModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            Close
+          </button>
+        </div>
+      `;
+
+      document.getElementById('progressModal').classList.remove('hidden');
+
+      // Auto-hide success messages
+      if (type === 'success') {
+        setTimeout(hideProgressModal, 2000);
+      }
+    }
+
+    function hideProgressModal() {
+      document.getElementById('progressModal').classList.add('hidden');
+    }
+
+    // Function to refresh the entire page state
+    function refreshPageState() {
+      // Clear all states
+      pendingChanges.clear();
+      lockedTasks.clear();
+      savedTasks.clear();
+      
+      // Reset all checkboxes and styling
+      document.querySelectorAll('.sop-task').forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.disabled = false;
+        const label = checkbox.parentElement;
+        label.classList.remove('opacity-75', 'bg-green-100', 'opacity-50', 'bg-red-100', 'bg-yellow-100');
+        label.title = '';
+        
+        // Remove any completion info elements
+        const completionInfo = label.querySelector('.text-xs');
+        if (completionInfo) {
+          completionInfo.remove();
+        }
+      });
+      
+      // Reload task status
+      loadTaskStatus();
+    }
+
+    // Check for page refresh signals (useful when reset from admin)
+    function checkForResetSignal() {
+      const resetSignal = localStorage.getItem('sop_reset_signal');
+      if (resetSignal) {
+        localStorage.removeItem('sop_reset_signal');
+        refreshPageState();
+        showProgressModal('✅ SOP has been reset by admin. Page refreshed.', 'success');
+      }
+    }
+
+    // Listen for storage events (cross-tab communication)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'sop_reset_signal') {
+        refreshPageState();
+        showProgressModal('✅ SOP has been reset. Page refreshed.', 'success');
+      }
+    });
+
+    // Initialize
+    loadTaskStatus();
+    checkForResetSignal();
+    
+    // Check for reset signals every 10 seconds
+    setInterval(checkForResetSignal, 10000);
+  </script>

@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | SOP Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .tab-button { transition: all 0.2s ease; }
+    .tab-button.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+    .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; }
+    .calendar-day:hover { background-color: #e0e7ff; }
+    .calendar-day.marked { background-color: #3b82f6; color: white; }
+    .calendar-day.today { border: 2px solid #f59e0b; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <!-- Header -->
+  <header class="gradient-bg shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center">
+          <div class="bg-white/20 backdrop-blur-sm rounded-lg p-2 mr-4">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-white">SOP Tracker</h1>
+            <p class="text-white/80 text-sm">Welcome, <span id="username-display" class="font-semibold">User</span>!</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-mono text-white" id="clock">--:--:--</div>
+          <div class="hidden md:block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg text-sm text-white">
+            <div class="font-semibold" id="todayDate">Today</div>
+          </div>
+          <button 
+            onclick="showProfile()" 
+            class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-3 py-2 rounded-lg transition duration-200 text-sm font-medium"
+            title="View your profile"
+          >
+            Profile
+          </button>
+          <button 
+            onclick="showPasswordReset()" 
+            class="bg-orange-500/80 backdrop-blur-sm hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition duration-200 text-sm font-medium"
+            title="Change your password"
+          >
+            Password
+          </button>
+          <button 
+            onclick="logout()" 
+            class="bg-red-500/80 backdrop-blur-sm hover:bg-red-600 text-white px-3 py-2 rounded-lg transition duration-200 text-sm font-medium"
+            title="Logout and return to login screen"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+      <div class="flex flex-wrap border-b border-gray-200">
+        <button class="tab-button px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 active" onclick="switchTab(event, 'sops')">
+          📋 SOPs
+        </button>
+        <button class="tab-button px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900" onclick="switchTab(event, 'calendar')">
+          📅 Shared Calendar
+        </button>
+        <button class="tab-button px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900" onclick="switchTab(event, 'shifts')">
+          👥 Shift Plan
+        </button>
+        <button id="adminTab" class="tab-button px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 hidden" onclick="switchTab(event, 'admin')">
+          ⚙️ Admin
+        </button>
+      </div>
+
+      <!-- SOPs Tab Content -->
+      <div id="sops-content" class="tab-content active p-6">
+        <!-- Trading SOPs Section -->
+        <div class="mb-8">
+          <div class="flex items-center mb-4">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></div>
+            <h3 class="text-xl font-bold text-gray-900">📈 Trading SOPs</h3>
+          </div>
+          <div id="tradingSOPsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- SOP cards will be dynamically loaded here -->
+            <p id="loadingSOPs" class="text-gray-500">Loading SOPs...</p>
+          </div>
+        </div>
+
+        <!-- Infrastructure Section -->
+        <div class="mb-6">
+          <div class="flex items-center mb-4">
+            <div class="bg-gradient-to-r from-yellow-500 to-amber-500 w-1 h-6 rounded-full mr-3"></div>
+            <h3 class="text-xl font-bold text-gray-900">🔧 Infrastructure SOPs</h3>
+          </div>
+          <div id="infraSOPsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- SOP cards will be dynamically loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Shared Calendar Tab Content -->
+      <div id="calendar-content" class="tab-content p-6">
+        <div class="max-w-4xl mx-auto">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">📅 Shared Calendar</h2>
+            <div class="flex items-center space-x-4">
+              <button id="prevMonth" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              <h3 id="currentMonth" class="text-lg font-semibold text-gray-800 min-w-[200px] text-center">Loading...</h3>
+              <button id="nextMonth" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <!-- Calendar Header -->
+            <div class="calendar-grid bg-gray-50 border-b border-gray-200">
+              <div class="p-3 text-center font-semibold text-gray-700 text-sm">Sun</div>
+              <div class="p-3 text-center font-semibold text-gray-700 text-sm">Mon</div>
+              <div class="p-3 text-center font-semibold text-gray-700 text-sm">Tue</div>
+              <div class="p-3 text-center font-semibold text-gray-700 text-sm">Wed</div>
+              <div class="p-3 text-center font-semibold text-gray-700 text-sm">Thu</div>
+              <div class="p-3 text-center font-semibold text-gray-700 text-sm">Fri</div>
+              <div class="p-3 text-center font-semibold text-gray-700 text-sm">Sat</div>
+            </div>
+            <!-- Calendar Body -->
+            <div id="calendarBody" class="calendar-grid">
+              <!-- Calendar days will be generated here -->
+            </div>
+          </div>
+
+          <!-- Marked Dates Legend -->
+          <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+            <h4 class="text-lg font-semibold text-gray-900 mb-3">📝 Recent Markings</h4>
+            <div id="markedDatesList" class="space-y-2">
+              <!-- Marked dates list will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shift Plan Tab Content -->
+      <div id="shifts-content" class="tab-content p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">👥 Shift Plan</h2>
+        <div id="shiftPlanContent" class="space-y-6">
+          <!-- Shift plan will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Admin Tab Content -->
+      <div id="admin-content" class="tab-content p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">⚙️ Administrative Tools</h2>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 max-w-md">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h4 class="text-lg font-semibold text-gray-900">Admin Panel</h4>
+              <p class="text-sm text-gray-500">System management</p>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm mb-4">Manage users, view reports, and configure system settings.</p>
+          <a href="admin.html" class="block w-full bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 text-white py-3 px-4 rounded-lg transition duration-200 text-sm font-medium text-center">
+            Open Admin Panel
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">My Profile</h3>
+            <button onclick="hideProfile()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="profileContent" class="space-y-4">
+            <!-- Profile content will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div id="passwordResetModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">🔒 Change Password</h3>
+            <button onclick="hidePasswordReset()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <form id="passwordResetForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+              <input type="password" id="currentPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+              <input type="password" id="newPassword" required minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <p class="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+              <input type="password" id="confirmPassword" required minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex space-x-3 pt-4">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                Change Password
+              </button>
+              <button type="button" onclick="hidePasswordReset()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date Marking Modal -->
+    <div id="dateMarkingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">📅 Mark Date</h3>
+            <button onclick="hideDateMarkingModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <form id="dateMarkingForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Selected Date</label>
+              <input type="text" id="selectedDate" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+              <input type="text" id="dateDescription" placeholder="e.g., Holiday, Meeting, etc." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <p class="text-xs text-gray-500 mt-1">Maximum 200 characters</p>
+            </div>
+            <div class="flex space-x-3 pt-4">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                Mark Date
+              </button>
+              <button type="button" onclick="hideDateMarkingModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check if the 'api' object from api.js is available
+    console.log("api.js loaded. api object:", typeof api, api); 
+
+    // Check authentication
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    // Global variables
+    let currentDate = new Date();
+    let markedDates = [];
+    let selectedDateForMarking = null;
+    let allSOPDefinitions = []; // Global variable to store all SOP definitions
+
+    // Live clock
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      });
+      document.getElementById('clock').textContent = timeStr;
+      
+      // Update date
+      const dateStr = now.toLocaleDateString('en-US', { 
+        weekday: 'short',
+        month: 'short', 
+        day: 'numeric' 
+      });
+      document.getElementById('todayDate').textContent = dateStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Tab switching functionality
+    function switchTab(event, tabName) { // Added 'event' parameter
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all tab buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(tabName + '-content').classList.add('active');
+      
+      // Add active class to clicked tab button
+      event.target.classList.add('active');
+      
+      // Load specific content if needed
+      if (tabName === 'calendar') {
+        loadCalendar();
+      } else if (tabName === 'shifts') {
+        loadShiftPlan();
+      }
+    }
+
+    // Calendar functionality
+    async function loadCalendar() {
+      try {
+        markedDates = await api.getMarkedDates();
+        generateCalendar();
+        updateMarkedDatesList();
+      } catch (error) {
+        console.error('Failed to load calendar:', error);
+      }
+    }
+
+    function generateCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      // Update month display
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+      document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+      
+      // Get first day of month and number of days
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      const calendarBody = document.getElementById('calendarBody');
+      calendarBody.innerHTML = '';
+      
+      // Add empty cells for days before month starts
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day bg-gray-50';
+        calendarBody.appendChild(emptyDay);
+      }
+      
+      // Add days of the month
+      const today = new Date();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        
+        dayElement.className = 'calendar-day bg-white border border-gray-100 text-sm font-medium';
+        dayElement.textContent = day;
+        dayElement.onclick = () => selectDate(dateStr);
+        
+        // Check if this date is today
+        if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+          dayElement.classList.add('today');
+        }
+        
+        // Check if this date is marked
+        const markedDate = markedDates.find(md => md.marked_date === dateStr);
+        if (markedDate) {
+          dayElement.classList.add('marked');
+          dayElement.title = `${markedDate.username}: ${markedDate.description || 'Marked'}`;
+        }
+        
+        calendarBody.appendChild(dayElement);
+      }
+    }
+
+    function selectDate(dateStr) {
+      selectedDateForMarking = dateStr;
+      document.getElementById('selectedDate').value = new Date(dateStr).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      // Check if date is already marked by current user
+      const currentUser = api.getCurrentUser();
+      const existingMark = markedDates.find(md => md.marked_date === dateStr && md.username === currentUser.username);
+      
+      if (existingMark) {
+        document.getElementById('dateDescription').value = existingMark.description || '';
+      } else {
+        document.getElementById('dateDescription').value = '';
+      }
+      
+      document.getElementById('dateMarkingModal').classList.remove('hidden');
+    }
+
+    function hideDateMarkingModal() {
+      document.getElementById('dateMarkingModal').classList.add('hidden');
+      selectedDateForMarking = null;
+    }
+
+    function updateMarkedDatesList() {
+      const markedDatesList = document.getElementById('markedDatesList');
+      
+      if (markedDates.length === 0) {
+        markedDatesList.innerHTML = '<p class="text-gray-500 text-sm">No dates marked yet.</p>';
+        return;
+      }
+      
+      // Sort by date (most recent first)
+      const sortedDates = [...markedDates].sort((a, b) => new Date(b.marked_date) - new Date(a.marked_date));
+      
+      markedDatesList.innerHTML = sortedDates.slice(0, 10).map(md => {
+        const date = new Date(md.marked_date);
+        const formattedDate = date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+        
+        return `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <div class="font-medium text-gray-900">${formattedDate}</div>
+              <div class="text-sm text-gray-600">${md.description || 'No description'}</div>
+            </div>
+            <div class="text-xs text-gray-500">
+              by ${md.username}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Calendar navigation
+    document.getElementById('prevMonth').onclick = () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      generateCalendar();
+    };
+
+    document.getElementById('nextMonth').onclick = () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      generateCalendar();
+    };
+
+    // Date marking form submission
+    document.getElementById('dateMarkingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!selectedDateForMarking) return;
+      
+      const description = document.getElementById('dateDescription').value.trim();
+      
+      try {
+        await api.markDate(selectedDateForMarking, description || null);
+        hideDateMarkingModal();
+        
+        // Reload calendar
+        await loadCalendar();
+        
+        // Show success message
+        alert('✅ Date marked successfully!');
+      } catch (error) {
+        console.error('Failed to mark date:', error);
+        alert('❌ Failed to mark date: ' + error.message);
+      }
+    });
+
+    // Function to render SOP cards dynamically
+    function renderSOPCards() {
+      console.log("Rendering SOP cards. Definitions:", allSOPDefinitions);
+      const tradingContainer = document.getElementById('tradingSOPsContainer');
+      const infraContainer = document.getElementById('infraSOPsContainer');
+      const loadingSOPs = document.getElementById('loadingSOPs');
+      
+      // Clear existing content and remove loading message
+      tradingContainer.innerHTML = '';
+      infraContainer.innerHTML = '';
+      if (loadingSOPs) loadingSOPs.remove();
+
+      if (allSOPDefinitions.length === 0) {
+        tradingContainer.innerHTML = '<p class="text-gray-500">No SOPs defined yet. Please contact your administrator.</p>';
+        return;
+      }
+
+      allSOPDefinitions.forEach(sop => {
+        // Change this from a div to an anchor tag
+        const sopCardLink = document.createElement('a');
+        sopCardLink.href = `${sop.sop_type}.html`; // Set the link target
+        sopCardLink.className = 'block bg-white rounded-lg shadow-sm border border-gray-100 p-4 card-hover'; // Apply card styling and hover to the link itself
+        sopCardLink.setAttribute('data-sop-type', sop.sop_type); // Keep data attribute for filtering
+
+        // Determine icon and colors based on SOP type (you can expand this logic)
+        let icon = '📋';
+        let gradientFrom = 'from-blue-500';
+        let gradientTo = 'to-indigo-500';
+
+        if (sop.sop_type.includes('gift')) {
+          icon = '📈';
+          gradientFrom = 'from-green-500';
+          gradientTo = 'to-emerald-500';
+        } else if (sop.sop_type.includes('mcx')) {
+          icon = '📊';
+          gradientFrom = 'from-orange-500';
+          gradientTo = 'to-red-500';
+        } else if (sop.sop_type.includes('bse')) {
+          icon = '📂';
+          gradientFrom = 'from-blue-500';
+          gradientTo = 'to-indigo-500';
+        } else if (sop.sop_type.includes('us_position')) {
+          icon = '🇺🇸';
+          gradientFrom = 'from-purple-500';
+          gradientTo = 'to-indigo-500';
+        } else if (sop.sop_type.includes('lease_line')) {
+          icon = '📡';
+          gradientFrom = 'from-yellow-500';
+          gradientTo = 'to-amber-500';
+        } else if (sop.sop_type.includes('infra')) {
+          icon = '🏗️';
+          gradientFrom = 'from-emerald-500';
+          gradientTo = 'to-teal-500';
+        }
+
+        sopCardLink.innerHTML = `
+          <div class="flex items-center mb-3">
+            <div class="w-10 h-10 ${gradientFrom} ${gradientTo} rounded-lg flex items-center justify-center">
+              <span class="text-white text-lg">${icon}</span>
+            </div>
+            <div class="ml-3">
+              <h4 class="text-base font-semibold text-gray-900">${sop.display_name}</h4>
+              <p class="text-xs text-gray-500">${sop.description || 'No description'}</p>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">${sop.description || 'Standard operating procedures.'}</p>
+          <!-- This is now just a styled div, as the parent <a> tag handles the click -->
+          <div class="w-full ${gradientFrom} ${gradientTo} text-white py-2 px-3 rounded-lg text-sm font-medium text-center">
+            Access ${sop.display_name}
+          </div>
+        `;
+
+        // Categorize into containers
+        if (sop.sop_type.includes('gift') || sop.sop_type.includes('mcx') || sop.sop_type.includes('bse') || sop.sop_type.includes('us_position')) {
+          tradingContainer.appendChild(sopCardLink); // Append the link element
+        } else if (sop.sop_type.includes('infra') || sop.sop_type.includes('lease_line')) {
+          infraContainer.appendChild(sopCardLink); // Append the link element
+        } else {
+          // Fallback for uncategorized SOPs, maybe add to trading or a new 'Other' section
+          tradingContainer.appendChild(sopCardLink); // Append the link element
+        }
+      });
+    }
+
+    async function loadUserInfo() {
+      try {
+        const user = api.getCurrentUser();
+        console.log("Current User:", user); 
+        if (user) {
+          document.getElementById("username-display").textContent = user.name || user.username;
+          
+          // Show admin tab if user is admin
+          if (user.role === 'admin') {
+            document.getElementById('adminTab').classList.remove('hidden');
+          }
+
+          // Render SOP cards first, then filter them
+          renderSOPCards();
+          console.log("User allowed SOPs:", user.allowed_sops); 
+          filterSOPCards(user.allowed_sops);
+        }
+      } catch (error) {
+        console.error('Failed to load user info:', error);
+      }
+    }
+
+    // filterSOPCards to operate on dynamically generated cards
+    function filterSOPCards(allowedSOPs) {
+      console.log("Filtering SOP cards. Allowed SOPs:", allowedSOPs); 
+      const sopCards = document.querySelectorAll('.card-hover'); 
+      console.log("Total SOP cards found in DOM:", sopCards.length); 
+      sopCards.forEach(card => {
+        const sopType = card.dataset.sopType; 
+        const isAllowed = allowedSOPs && allowedSOPs.includes(sopType);
+        console.log(`SOP: ${sopType}, Is Allowed: ${isAllowed}`); 
+        if (!isAllowed) {
+          card.classList.add('hidden'); 
+        } else {
+          card.classList.remove('hidden'); 
+        }
+      });
+    }
+
+    // Profile modal functions
+    async function showProfile() {
+      try {
+        const profile = await api.getProfile();
+        const content = document.getElementById('profileContent');
+        
+        content.innerHTML = `
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Username</label>
+              <p class="mt-1 text-sm text-gray-900">${profile.username}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Full Name</label>
+              <p class="mt-1 text-sm text-gray-900">${profile.name || 'Not set'}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Email</label>
+              <p class="mt-1 text-sm text-gray-900">${profile.email}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Role</label>
+              <p class="mt-1 text-sm text-gray-900 capitalize">${profile.role}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Status</label>
+              <span class="mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${profile.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                ${profile.is_active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('profileModal').classList.remove('hidden');
+      } catch (error) {
+        console.error('Error in showProfile:', error); // Specific error log
+        alert('Failed to load profile: ' + error.message);
+      }
+    }
+
+    function hideProfile() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    // Password reset modal functions
+    function showPasswordReset() {
+      try {
+        document.getElementById('passwordResetModal').classList.remove('hidden');
+        document.getElementById('passwordResetForm').reset();
+      } catch (error) {
+        console.error('Error in showPasswordReset:', error); // Specific error log
+      }
+    }
+
+    function hidePasswordReset() {
+      try {
+        document.getElementById('passwordResetModal').classList.add('hidden');
+        document.getElementById('passwordResetForm').reset();
+      } catch (error) {
+        console.error('Error in hidePasswordReset:', error); // Specific error log
+      }
+    }
+
+    // Handle password reset form submission
+    document.getElementById('passwordResetForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (newPassword !== confirmPassword) {
+        alert('New passwords do not match');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        alert('New password must be at least 6 characters long');
+        return;
+      }
+      
+      try {
+        await api.resetPassword(currentPassword, newPassword);
+        alert('✅ Password changed successfully');
+        hidePasswordReset();
+      } catch (error) {
+        console.error('Error in password reset form submission:', error); // Specific error log
+        alert('❌ Failed to change password: ' + error.message);
+      }
+    });
+
+    // Logout function
+    function logout() {
+      try {
+        if (confirm('Are you sure you want to sign out?')) {
+          api.logout();
+        }
+      } catch (error) {
+        console.error('Error in logout:', error); // Specific error log
+      }
+    }
+    
+    // Load shift plan
+    async function loadShiftPlan() {
+      try {
+        const shiftData = await api.getUsersByShift();
+        const shiftPlanContent = document.getElementById('shiftPlanContent');
+        
+        let html = '';
+        
+        // Create shift sections
+        const shifts = ['Morning', 'Day', 'Night', 'Unassigned'];
+        
+        shifts.forEach(shift => {
+          const users = shiftData[shift] || [];
+          const shiftIcon = shift === 'Morning' ? '🌅' : shift === 'Day' ? '☀️' : shift === 'Night' ? '🌙' : '❓';
+          
+          html += `
+            <div class="border rounded-lg p-4">
+              <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                <span class="mr-2">${shiftIcon}</span>
+                ${shift} Shift (${users.length} users)
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          `;
+          
+          if (users.length === 0) {
+            html += '<p class="text-gray-500 text-sm">No users assigned</p>';
+          } else {
+            users.forEach(user => {
+              // Note: user.exchanges is not part of the current UserResponse model,
+              // so this part might not display correctly unless added to the backend model.
+              // Keeping it as is for now, but be aware.
+              const exchanges = user.exchanges && user.exchanges.length > 0 ? 
+                user.exchanges.map(ex => `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 mr-1">${ex}</span>`).join('') : 
+                '<span class="text-gray-500 text-xs">No exchanges</span>';
+              
+              html += `
+                <div class="bg-gray-50 rounded-lg p-3">
+                  <div class="font-medium text-gray-900">${user.name || user.username}</div>
+                  <div class="text-sm text-gray-600">${user.email}</div>
+                </div>
+              `;
+            });
+          }
+          
+          html += `
+                  </div>
+                </div>
+              `;
+            });
+            
+            shiftPlanContent.innerHTML = html;
+            
+          } catch (error) {
+            console.error('Failed to load shift plan:', error); // Specific error log
+            document.getElementById('shiftPlanContent').innerHTML = '<p class="text-red-500">Failed to load shift plan</p>';
+          }
+        }
+
+        // Initialize
+        async function initialize() {
+          console.log("Initializing dashboard..."); 
+          try {
+            // Fetch all SOP definitions using the correct API method
+            allSOPDefinitions = await api.getSOPTypesWithActivity();
+            console.log("Fetched SOP Definitions:", allSOPDefinitions); 
+            
+            // Then load user info, which will now render and filter cards
+            loadUserInfo();
+          } catch (error) {
+            console.error("Error initializing dashboard:", error);
+            document.getElementById('loadingSOPs').textContent = 'Failed to load SOPs. Please try again later.';
+          }
+        }
+
+        // Call initialize only after the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initialize);
+      </script>
+    </body>
+    </html>

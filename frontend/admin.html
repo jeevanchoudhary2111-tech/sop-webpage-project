@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel | SOP Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .tab-button { transition: all 0.2s ease; }
+    .tab-button.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+  <!-- Header -->
+  <header class="gradient-bg shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center">
+          <div class="bg-white/20 backdrop-blur-sm rounded-lg p-2 mr-4">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-white">Admin Panel</h1>
+            <p class="text-white/80 text-sm">System Administration</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-mono text-white" id="clock">--:--:--</div>
+          <a href="dashboard.html" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-3 py-2 rounded-lg transition duration-200 text-sm font-medium">
+            Back to Dashboard
+          </a>
+          <button onclick="logout()" class="bg-red-500/80 backdrop-blur-sm hover:bg-red-600 text-white px-3 py-2 rounded-lg transition duration-200 text-sm font-medium">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Tab Navigation -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+      <div class="flex flex-wrap border-b border-gray-200">
+        <button class="tab-button px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900 active" onclick="switchTab(event, 'users')">
+          👥 User Management
+        </button>
+        <button class="tab-button px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900" onclick="switchTab(event, 'sops')">
+          📋 SOP Management
+        </button>
+        <button class="tab-button px-6 py-4 text-sm font-medium text-gray-600 hover:text-gray-900" onclick="switchTab(event, 'reports')">
+          📊 Reports
+        </button>
+      </div>
+
+      <!-- User Management Tab -->
+      <div id="users-content" class="tab-content active p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">User Management</h2>
+          <button onclick="showCreateUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 font-medium">
+            + Create User
+          </button>
+        </div>
+
+        <!-- Users Table -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <div id="usersTableContainer">
+            <!-- Users table will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SOP Management Tab -->
+      <div id="sops-content" class="tab-content p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">SOP Management</h2>
+          <button onclick="showSOPDefinitionModal('create')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 font-medium">
+            + Create New SOP
+          </button>
+        </div>
+        
+        <!-- SOP Types Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" id="sopTypesContainer">
+          <!-- SOP types will be loaded here -->
+        </div>
+
+        <!-- SOP Reset Controls -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">⚠️ Reset Controls</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div>
+                <h4 class="font-medium text-yellow-800">Reset All SOPs</h4>
+                <p class="text-sm text-yellow-600">This will reset all SOP data for all users</p>
+              </div>
+              <button onclick="resetAllSOPs()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition duration-200 font-medium">
+                Reset All
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOP Activity Display -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 Recent SOP Activities</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">SOP Type</label>
+              <select id="activitySOPTypeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All SOPs</option>
+                <!-- Options will be populated by JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+              <select id="activityDaysFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="1">Last 24 hours</option>
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button onclick="loadSOPActivitiesTable()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200 font-medium">
+                Apply Filters
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SOP Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                </tr>
+              </thead>
+              <tbody id="sopActivitiesTableBody" class="bg-white divide-y divide-gray-200">
+                <tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Loading activities...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="sopActivitiesLoading" class="text-center py-4 hidden">Loading...</div>
+          <div id="sopActivitiesError" class="text-center py-4 text-red-500 hidden"></div>
+        </div>
+      </div>
+
+      <!-- Reports Tab -->
+      <div id="reports-content" class="tab-content p-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Reports & Analytics</h2>
+        
+        <!-- Report Generation -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- SOP Reports -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 SOP Reports</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">SOP Type</label>
+                <select id="reportSOPType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">All SOPs</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Time Period (Days)</label>
+                <select id="reportDays" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="7">Last 7 days</option>
+                  <option value="30" selected>Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                <select id="reportFormat" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="html">HTML Report</option>
+                  <option value="csv">CSV Export</option>
+                </select>
+              </div>
+              <button onclick="downloadSOPReport()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200 font-medium">
+                Generate Report
+              </button>
+            </div>
+          </div>
+
+          <!-- Daily Reports -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">📅 Daily Reports</h3>
+            <div id="dailyReportStatus" class="mb-4">
+              <!-- Daily report status will be loaded here -->
+            </div>
+            <button onclick="downloadDailyReport()" id="downloadDailyReportBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200 font-medium" disabled>
+              Download Daily Report
+            </button>
+          </div>
+             <!-- New section for US Position Report -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mt-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">🇺🇸 US Position Report</h3>
+            <p class="text-gray-600 text-sm mb-4">Download the US Position data as an HTML report.</p>
+            
+            <!-- ADDED: Date input for US Position Report -->
+            <div class="mb-4">
+              <label for="usPositionReportDate" class="block text-sm font-medium text-gray-700 mb-1">Select Date (Optional)</label>
+              <input type="date" id="usPositionReportDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+
+            <button onclick="downloadUSPositionReportWithDate()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition duration-200 font-medium">
+              Download US Position Report
+            </button>
+        </div>
+      </div>
+</main>
+
+    <!-- Create/Edit User Modal -->
+    <div id="createUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Create New User</h3>
+            <button onclick="hideCreateUserModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <form id="userCreateForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+              <input type="text" id="createUsername" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input type="text" id="createName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <input type="email" id="createEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+              <input type="password" id="createPassword" required minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select id="createRole" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
+              <select id="createShift" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">No Shift Assigned</option>
+                <option value="Morning">Morning</option>
+                <option value="Day">Day</option>
+                <option value="Night">Night</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Allowed SOPs</label>
+              <div id="createAllowedSOPs" class="mt-1 space-y-2 max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                <!-- SOP checkboxes will be populated here -->
+              </div>
+            </div>
+            <div class="flex space-x-3 pt-4">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                Create User
+              </button>
+              <button type="button" onclick="hideCreateUserModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
+            <button onclick="hideEditUserModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <form id="editUserForm" class="space-y-4">
+            <input type="hidden" id="editUserId">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input type="text" id="editUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input type="text" id="editName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" id="editEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">New Password (leave blank to keep current)</label>
+              <input type="password" id="editPassword" minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select id="editRole" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Active Status</label>
+              <select id="editIsActive" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
+              <select id="editShift" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">No Shift Assigned</option>
+                <option value="Morning">Morning</option>
+                <option value="Day">Day</option>
+                <option value="Night">Night</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Allowed SOPs</label>
+              <div id="editAllowedSOPs" class="mt-1 space-y-2 max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                 <!-- SOP checkboxes will be populated here -->
+              </div>
+            </div>
+            <div class="flex space-x-3 pt-4">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                Update User
+              </button>
+              <button type="button" onclick="hideEditUserModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shift Assignment Modal -->
+    <div id="shiftAssignmentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Assign Shift</h3>
+            <button onclick="hideShiftAssignmentModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <form id="shiftAssignmentForm" class="space-y-4">
+            <input type="hidden" id="assignUserId">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">User</label>
+              <p id="assignUserInfo" class="text-sm text-gray-600 bg-gray-50 p-2 rounded"></p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Shift</label>
+              <select id="assignShift" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">No Shift</option>
+                <option value="Morning">Morning</option>
+                <option value="Day">Day</option>
+                <option value="Night">Night</option>
+              </select>
+            </div>
+            <div class="flex space-x-3 pt-4">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                Assign Shift
+              </button>
+              <button type="button" onclick="hideShiftAssignmentModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOP Definition Modal (Create/Edit) -->
+    <div id="sopDefinitionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900" id="sopDefinitionModalTitle">Create SOP Definition</h3>
+            <button onclick="hideSOPDefinitionModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <form id="sopDefinitionForm" class="space-y-4">
+            <input type="hidden" id="sopDefinitionId">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">SOP Type ID *</label>
+              <input type="text" id="sopType" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <p class="text-xs text-gray-500 mt-1">Unique identifier (e.g., 'gift_sop'). Cannot be changed after creation.</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Display Name *</label>
+              <input type="text" id="sopDisplayName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <p class="text-xs text-gray-500 mt-1">User-friendly name (e.g., 'GIFT SOP').</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea id="sopDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Brief description of this SOP"></textarea>
+            </div>
+            <div class="flex space-x-3 pt-4">
+              <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200" id="sopDefinitionSubmitBtn">
+                Create SOP
+              </button>
+              <button type="button" onclick="hideSOPDefinitionModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-200">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check authentication and admin role
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    const currentUser = api.getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      alert('Access denied. Admin privileges required.');
+      window.location.href = 'dashboard.html';
+    }
+
+    // Global variables
+    let availableSOPTypes = [];
+    let currentEditUserId = null;
+    let currentAssignUserId = null;
+    let currentSOPDefinitionId = null; // NEW: To store the ID of the SOP being edited
+
+    // Download US Position report
+    async function downloadUSPositionReport() { // NEW FUNCTION
+      try {
+        await api.downloadUSPositionReport();
+        alert('✅ US Position report downloaded successfully!');
+      } catch (error) {
+        console.error('Failed to download US Position report:', error);
+        alert('❌ Failed to download US Position report: ' + error.message);
+      }
+    }
+
+    // Download US Position report with date selection
+    async function downloadUSPositionReportWithDate() { // MODIFIED FUNCTION NAME
+      const selectedDate = document.getElementById('usPositionReportDate').value; // GET SELECTED DATE
+      try {
+        await api.downloadUSPositionReport(selectedDate); // PASS SELECTED DATE
+        alert('✅ US Position report downloaded successfully!');
+      } catch (error) {
+        console.error('Failed to download US Position report:', error);
+        alert('❌ Failed to download US Position report: ' + error.message);
+      }
+    }
+
+    // Live clock
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      });
+      document.getElementById('clock').textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Tab switching functionality
+    function switchTab(event, tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all tab buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(tabName + '-content').classList.add('active');
+      
+      // Add active class to clicked tab button
+      event.target.classList.add('active');
+      
+      // Load specific content if needed
+      if (tabName === 'users') {
+        loadUsersForManagement();
+      } else if (tabName === 'sops') {
+        loadSOPManagement();
+      } else if (tabName === 'reports') {
+        loadReports();
+      }
+    }
+
+    // Load available SOP types (now from sop_definitions endpoint)
+    async function loadAvailableSOPTypes() {
+      try {
+        availableSOPTypes = await api.getSOPTypesWithActivity();
+        console.log('Loaded SOP types:', availableSOPTypes);
+
+      } catch (error) {
+        console.error('Failed to load SOP types from API:', error);
+        availableSOPTypes = []; // Fallback to empty if API fails
+      }
+    }
+
+
+    // Populate SOP checkboxes (used in user create/edit modals)
+    function populateSOPCheckboxes(containerId, checkboxClass, selectedSOPs = []) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      availableSOPTypes.forEach(sopType => {
+        const checkboxDiv = document.createElement('div');
+        checkboxDiv.className = 'flex items-center';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = `form-checkbox ${checkboxClass}`;
+        checkbox.value = sopType.sop_type;
+        checkbox.id = `${containerId}_${sopType.sop_type}`;
+        checkbox.checked = selectedSOPs.includes(sopType.sop_type);
+        
+        const label = document.createElement('label');
+        label.htmlFor = checkbox.id;
+        label.className = 'ml-2 text-sm text-gray-700 cursor-pointer';
+        label.textContent = sopType.display_name;
+        
+        checkboxDiv.appendChild(checkbox);
+        checkboxDiv.appendChild(label);
+        container.appendChild(checkboxDiv);
+      });
+    }
+
+    // Load users for management
+    async function loadUsersForManagement() {
+      try {
+        const users = await api.getUsers();
+        const container = document.getElementById('usersTableContainer');
+        
+        if (users.length === 0) {
+          container.innerHTML = '<p class="text-gray-500 text-center py-8">No users found</p>';
+          return;
+        }
+
+        let html = `
+          <table class="min-w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Allowed SOPs</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+        `;
+
+        users.forEach(user => {
+          const allowedSOPs = user.allowed_sops || [];
+          const sopBadges = allowedSOPs.length > 0 
+            ? allowedSOPs.map(sop => {
+                const sopType = availableSOPTypes.find(s => s.sop_type === sop);
+                const displayName = sopType ? sopType.display_name : sop;
+                return `<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 mr-1 mb-1">${displayName}</span>`;
+              }).join('')
+            : '<span class="text-gray-400 text-xs">No SOPs assigned</span>';
+
+          html += `
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">
+                <div>
+                  <div class="font-medium text-gray-900">${user.username}</div>
+                  <div class="text-sm text-gray-500">${user.name || 'No name set'}</div>
+                </div>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-900">${user.email}</td>
+              <td class="px-4 py-2">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}">
+                  ${user.role}
+                </span>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-900">${user.shift || 'Not assigned'}</td>
+              <td class="px-4 py-2">
+                <div class="max-w-xs">${sopBadges}</div>
+              </td>
+              <td class="px-4 py-2">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                  ${user.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </td>
+              <td class="px-4 py-2 text-sm space-x-2">
+                <button onclick="showEditUserModal('${user.id}')" class="text-blue-600 hover:text-blue-800">Edit</button>
+                <button onclick="showShiftAssignment('${user.id}', '${user.username}', '${user.name || ''}', '${user.shift || ''}')" class="text-green-600 hover:text-green-800">Assign Shift</button>
+                <button onclick="deleteUser('${user.id}', '${user.username}')" class="text-red-600 hover:text-red-800">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `
+            </tbody>
+          </table>
+        `;
+
+        container.innerHTML = html;
+      } catch (error) {
+        console.error('Failed to load users:', error);
+        document.getElementById('usersTableContainer').innerHTML = '<p class="text-red-500 text-center py-8">Failed to load users</p>';
+      }
+    }
+
+    // Show create user modal
+    function showCreateUserModal() {
+      populateSOPCheckboxes('createAllowedSOPs', 'allowed-sop-checkbox');
+      document.getElementById('createUserModal').classList.remove('hidden');
+    }
+
+    // Hide create user modal
+    function hideCreateUserModal() {
+      document.getElementById('createUserModal').classList.add('hidden');
+      document.getElementById('userCreateForm').reset();
+    }
+
+    // Show edit user modal
+    async function showEditUserModal(userId) {
+      try {
+        const user = await api.getUserById(userId);
+        currentEditUserId = userId;
+        
+        document.getElementById('editUserId').value = user.id;
+        document.getElementById('editUsername').value = user.username;
+        document.getElementById('editName').value = user.name || '';
+        document.getElementById('editEmail').value = user.email;
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editRole').value = user.role;
+        document.getElementById('editIsActive').value = user.is_active.toString();
+        document.getElementById('editShift').value = user.shift || '';
+        
+        // Populate SOP checkboxes with current user's allowed SOPs
+        populateSOPCheckboxes('editAllowedSOPs', 'edit-allowed-sop-checkbox', user.allowed_sops || []);
+        
+        document.getElementById('editUserModal').classList.remove('hidden');
+      } catch (error) {
+        console.error('Failed to load user for editing:', error);
+        alert('Failed to load user details');
+      }
+    }
+
+    // Hide edit user modal
+    function hideEditUserModal() {
+      document.getElementById('editUserModal').classList.add('hidden');
+      document.getElementById('editUserForm').reset();
+      currentEditUserId = null;
+    }
+
+    // Show shift assignment modal
+    function showShiftAssignment(userId, username, name, currentShift) {
+      currentAssignUserId = userId;
+      document.getElementById('assignUserId').value = userId;
+      document.getElementById('assignUserInfo').textContent = `${username} (${name || 'No name'})`;
+      document.getElementById('assignShift').value = currentShift;
+      document.getElementById('shiftAssignmentModal').classList.remove('hidden');
+    }
+
+    // Hide shift assignment modal
+    function hideShiftAssignmentModal() {
+      document.getElementById('shiftAssignmentModal').classList.add('hidden');
+      document.getElementById('shiftAssignmentForm').reset();
+      currentAssignUserId = null;
+    }
+
+    // User create form submission
+    document.getElementById('userCreateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('createUsername').value;
+      const name = document.getElementById('createName').value;
+      const email = document.getElementById('createEmail').value;
+      const password = document.getElementById('createPassword').value;
+      const role = document.getElementById('createRole').value;
+      const shift = document.getElementById('createShift').value;
+      const allowedSOPs = Array.from(document.querySelectorAll('.allowed-sop-checkbox:checked')).map(cb => cb.value);
+      
+      try {
+        const userData = {
+          username,
+          name: name || null,
+          email,
+          password,
+          role,
+          shift: shift || null,
+          allowed_sops: allowedSOPs
+        };
+        
+        await api.createUser(userData);
+        hideCreateUserModal();
+        loadUsersForManagement();
+        alert('User created successfully');
+      } catch (error) {
+        console.error('Failed to create user:', error);
+        alert('Failed to create user: ' + error.message);
+      }
+    });
+
+    // User edit form submission
+    document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!currentEditUserId) return;
+      
+      const username = document.getElementById('editUsername').value;
+      const name = document.getElementById('editName').value;
+      const email = document.getElementById('editEmail').value;
+      const password = document.getElementById('editPassword').value;
+      const role = document.getElementById('editRole').value;
+      const isActive = document.getElementById('editIsActive').value === 'true';
+      const shift = document.getElementById('editShift').value;
+      const allowedSOPs = Array.from(document.querySelectorAll('.edit-allowed-sop-checkbox:checked')).map(cb => cb.value);
+      
+      try {
+        const userData = {
+          username,
+          name: name || null,
+          email,
+          role,
+          is_active: isActive,
+          shift: shift || null,
+          allowed_sops: allowedSOPs
+        };
+        
+        if (password) {
+          userData.password = password;
+        }
+        
+        await api.updateUser(currentEditUserId, userData);
+        hideEditUserModal();
+        loadUsersForManagement();
+        alert('User updated successfully');
+      } catch (error) {
+        console.error('Failed to update user:', error);
+        alert('Failed to update user: ' + error.message);
+      }
+    });
+
+    // Shift assignment form submission
+    document.getElementById('shiftAssignmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!currentAssignUserId) return;
+      
+      const shift = document.getElementById('assignShift').value;
+      
+      try {
+        await api.assignUserShift(currentAssignUserId, shift);
+        hideShiftAssignmentModal();
+        loadUsersForManagement();
+        alert('Shift assigned successfully');
+      } catch (error) {
+        console.error('Failed to assign shift:', error);
+        alert('Failed to assign shift: ' + error.message);
+      }
+    });
+
+    // Delete user
+    async function deleteUser(userId, username) {
+      if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+        return;
+      }
+      
+      try {
+        await api.deleteUser(userId);
+        loadUsersForManagement();
+        alert('User deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+        alert('Failed to delete user: ' + error.message);
+      }
+    }
+
+    // Function to load and display SOP activities in the table
+    async function loadSOPActivitiesTable() {
+      const sopTypeFilter = document.getElementById('activitySOPTypeFilter').value;
+      const daysFilter = parseInt(document.getElementById('activityDaysFilter').value);
+      const tableBody = document.getElementById('sopActivitiesTableBody');
+      const loadingIndicator = document.getElementById('sopActivitiesLoading');
+      const errorDisplay = document.getElementById('sopActivitiesError');
+
+      loadingIndicator.classList.remove('hidden');
+      errorDisplay.classList.add('hidden');
+      tableBody.innerHTML = '';
+
+      try {
+        let allActivities = [];
+
+        // Fetch standard SOP activities
+        const standardActivities = await api.getAllSOPActivities(sopTypeFilter, null, daysFilter);
+        allActivities = allActivities.concat(standardActivities);
+
+        // Fetch US Position activities if relevant
+        if (sopTypeFilter === 'us_position_sop' || sopTypeFilter === '') {
+          const usActivities = await api.getAdminUSPositionActivities(daysFilter);
+          allActivities = allActivities.concat(usActivities);
+        }
+
+        // Sort all activities by completed_at timestamp in descending order
+        allActivities.sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+
+        if (allActivities.length === 0) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No activities found for the selected filters.</td>
+            </tr>
+          `;
+        } else {
+          allActivities.forEach(activity => {
+            const row = document.createElement('tr');
+            const completedAt = new Date(activity.completed_at).toLocaleString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+
+            row.innerHTML = `
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${completedAt}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${activity.username}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${activity.sop_type}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${activity.task_id}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">${activity.task_description}</td>
+            `;
+            tableBody.appendChild(row);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load SOP activities:', error);
+        errorDisplay.textContent = 'Failed to load activities: ' + error.message;
+        errorDisplay.classList.remove('hidden');
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-red-500 text-center">Error loading activities.</td>
+          </tr>
+        `;
+      } finally {
+        loadingIndicator.classList.add('hidden');
+      }
+    }
+
+    // Load SOP management (now includes SOP definitions)
+    async function loadSOPManagement() {
+      try {
+        const sopTypes = await api.getSOPTypesWithActivity(); // This now fetches from sop_definitions
+        const container = document.getElementById('sopTypesContainer');
+        
+        let html = '';
+        if (sopTypes.length === 0) {
+          html = '<p class="text-gray-500 text-center py-4 col-span-full">No SOP definitions found. Click "Create New SOP" to add some.</p>';
+        } else {
+          sopTypes.forEach(sop => {
+            const lastActivity = sop.last_activity ? new Date(sop.last_activity).toLocaleDateString() : 'Never';
+            html += `
+              <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <h4 class="font-semibold text-gray-900 mb-2">${sop.display_name}</h4>
+                <p class="text-sm text-gray-600 mb-2">${sop.description || 'No description provided.'}</p>
+                <div class="text-sm text-gray-600 space-y-1">
+                  <p>SOP ID: <span class="font-medium">${sop.sop_type}</span></p>
+                  <p>Activities: <span class="font-medium">${sop.activity_count}</span></p>
+                  <p>Last Activity: <span class="font-medium">${lastActivity}</span></p>
+                </div>
+                <div class="mt-3 flex space-x-2">
+                  <button onclick="showSOPDefinitionModal('edit', '${sop.id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-sm transition duration-200">
+                    Edit
+                  </button>
+                  <button onclick="resetSOPType('${sop.sop_type}')" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-3 rounded text-sm transition duration-200">
+                    Reset Data
+                  </button>
+                  <button onclick="deleteSOPDefinition('${sop.id}', '${sop.display_name}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm transition duration-200">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+        }
+        
+        container.innerHTML = html;
+        
+        // Populate SOP type dropdowns for activity filter and reports
+        const activitySOPTypeFilter = document.getElementById('activitySOPTypeFilter');
+        const reportSOPType = document.getElementById('reportSOPType');
+
+        [activitySOPTypeFilter, reportSOPType].forEach(selectElement => {
+          if (selectElement) {
+            selectElement.innerHTML = '<option value="">All SOPs</option>';
+            sopTypes.forEach(sop => {
+              selectElement.innerHTML += `<option value="${sop.sop_type}">${sop.display_name}</option>`;
+            });
+          }
+        });
+        
+      } catch (error) {
+        console.error('Failed to load SOP management:', error);
+      }
+    }
+
+    // Show SOP Definition Modal (Create/Edit)
+    async function showSOPDefinitionModal(mode, sopId = null) {
+      const modal = document.getElementById('sopDefinitionModal');
+      const title = document.getElementById('sopDefinitionModalTitle');
+      const sopTypeInput = document.getElementById('sopType');
+      const sopDisplayNameInput = document.getElementById('sopDisplayName');
+      const sopDescriptionInput = document.getElementById('sopDescription');
+      const submitBtn = document.getElementById('sopDefinitionSubmitBtn');
+      const sopDefinitionIdInput = document.getElementById('sopDefinitionId');
+
+      // Reset form
+      document.getElementById('sopDefinitionForm').reset();
+      sopTypeInput.readOnly = false; // Make SOP Type editable by default
+
+      if (mode === 'create') {
+        title.textContent = 'Create SOP Definition';
+        submitBtn.textContent = 'Create SOP';
+        currentSOPDefinitionId = null;
+        sopDefinitionIdInput.value = '';
+      } else if (mode === 'edit') {
+        title.textContent = 'Edit SOP Definition';
+        submitBtn.textContent = 'Update SOP';
+        sopTypeInput.readOnly = true; // SOP Type cannot be changed when editing
+        currentSOPDefinitionId = sopId;
+        sopDefinitionIdInput.value = sopId;
+
+        try {
+          // Find the SOP definition from the already loaded list
+          const sopToEdit = availableSOPTypes.find(sop => sop.id === sopId);
+          if (sopToEdit) {
+            sopTypeInput.value = sopToEdit.sop_type;
+            sopDisplayNameInput.value = sopToEdit.display_name;
+            sopDescriptionInput.value = sopToEdit.description || '';
+          } else {
+            alert('SOP definition not found.');
+            hideSOPDefinitionModal();
+            return;
+          }
+        } catch (error) {
+          console.error('Failed to load SOP definition for editing:', error);
+          alert('Failed to load SOP definition details.');
+          hideSOPDefinitionModal();
+          return;
+        }
+      }
+      modal.classList.remove('hidden');
+    }
+
+    // Hide SOP Definition Modal
+    function hideSOPDefinitionModal() {
+      document.getElementById('sopDefinitionModal').classList.add('hidden');
+      document.getElementById('sopDefinitionForm').reset();
+      currentSOPDefinitionId = null;
+    }
+
+    // Handle SOP Definition Form Submission
+    document.getElementById('sopDefinitionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const sopType = document.getElementById('sopType').value;
+      const displayName = document.getElementById('sopDisplayName').value;
+      const description = document.getElementById('sopDescription').value;
+      
+      const sopData = {
+        sop_type: sopType,
+        display_name: displayName,
+        description: description || null
+      };
+
+      try {
+        if (currentSOPDefinitionId) {
+          //Only send fields that can be updated (sop_type is read-only for edit)
+          const updateData = {
+            display_name: displayName,
+            description: description || null
+          };
+          await api.updateSOPDefinition(currentSOPDefinitionId, updateData);
+          alert('✅ SOP definition updated successfully!');
+        } else {
+          // Create new SOP
+          await api.createSOPDefinition(sopData);
+          alert('✅ SOP definition created successfully!');
+        }
+        hideSOPDefinitionModal();
+        await loadAvailableSOPTypes(); // Reload SOP types for user management dropdowns
+        loadSOPManagement(); // Refresh the SOP list in the admin panel
+      } catch (error) {
+        console.error('Failed to save SOP definition:', error);
+        alert('❌ Failed to save SOP definition: ' + error.message);
+      }
+    });
+
+    // Delete SOP Definition
+    async function deleteSOPDefinition(sopId, displayName) {
+      if (!confirm(`Are you sure you want to delete the SOP definition "${displayName}"? This will remove it from the system and users will no longer see it. This action cannot be undone.`)) {
+        return;
+      }
+      
+      try {
+        await api.deleteSOPDefinition(sopId);
+        alert(`✅ SOP definition "${displayName}" deleted successfully!`);
+        await loadAvailableSOPTypes(); // Reload SOP types for user management dropdowns
+        loadSOPManagement(); // Refresh the SOP list in the admin panel
+      } catch (error) {
+        console.error('Failed to delete SOP definition:', error);
+        alert('❌ Failed to delete SOP definition: ' + error.message);
+      }
+    }
+
+    // Reset SOP type (activity data)
+    async function resetSOPType(sopType) {
+      const sopTypeObj = availableSOPTypes.find(s => s.sop_type === sopType);
+      const displayName = sopTypeObj ? sopTypeObj.display_name : sopType;
+      
+      if (!confirm(`Are you sure you want to reset all activity data for "${displayName}"? This will generate a backup file and cannot be undone.`)) {
+        return;
+      }
+      
+      try {
+        await api.resetSOPTypeWithBackup(sopType);
+        loadSOPManagement();
+        alert(`${displayName} has been reset successfully. Backup file has been downloaded.`);
+      } catch (error) {
+        console.error('Failed to reset SOP type:', error);
+        alert('Failed to reset SOP type: ' + error.message);
+      }
+    }
+
+    // Reset all SOPs (activity data)
+    async function resetAllSOPs() {
+      if (!confirm('Are you sure you want to reset ALL SOP activity data? This action cannot be undone and will affect all users.')) {
+        return;
+      }
+      
+      if (!confirm('This is your final warning. ALL SOP activity data will be permanently deleted. Continue?')) {
+        return;
+      }
+      
+      try {
+        await api.resetAllSOPs();
+        loadSOPManagement();
+        alert('All SOP activity data has been reset successfully.');
+      } catch (error) {
+        console.error('Failed to reset all SOPs:', error);
+        alert('Failed to reset all SOPs: ' + error.message);
+      }
+    }
+
+    // Load reports
+    async function loadReports() {
+      try {
+        const reportStatus = await api.checkDailyReportAvailability();
+        const statusContainer = document.getElementById('dailyReportStatus');
+        const downloadBtn = document.getElementById('downloadDailyReportBtn');
+        
+        if (reportStatus.available) {
+          statusContainer.innerHTML = `
+            <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p class="text-sm text-green-800">✅ Daily report is available</p>
+              <p class="text-xs text-green-600 mt-1">Generated after daily reset at 3 AM IST</p>
+            </div>
+          `;
+          downloadBtn.disabled = false;
+        } else {
+          statusContainer.innerHTML = `
+            <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p class="text-sm text-yellow-800">⏳ Daily report not yet available</p>
+              <p class="text-xs text-yellow-600 mt-1">Next reset: ${new Date(reportStatus.next_reset).toLocaleString()}</p>
+            </div>
+          `;
+          downloadBtn.disabled = true;
+        }
+      } catch (error) {
+        console.error('Failed to check daily report status:', error);
+      }
+    }
+
+    // Download SOP report
+    async function downloadSOPReport() {
+      const sopType = document.getElementById('reportSOPType').value || null;
+      const days = parseInt(document.getElementById('reportDays').value);
+      const format = document.getElementById('reportFormat').value;
+      
+      try {
+        await api.downloadSOPReport(sopType, null, days, format);
+      } catch (error) {
+        console.error('Failed to download report:', error);
+        alert('Failed to download report: ' + error.message);
+      }
+    }
+
+    // Download daily report
+    async function downloadDailyReport() {
+      try {
+        await api.downloadDailyReport();
+      } catch (error) {
+        console.error('Failed to download daily report:', error);
+        alert('Failed to download daily report: ' + error.message);
+      }
+    }
+
+    // Logout function
+    function logout() {
+      if (confirm('Are you sure you want to sign out?')) {
+        api.logout();
+      }
+    }
+
+    // Initialize
+    async function initialize() {
+      await loadAvailableSOPTypes(); // Load SOP definitions first
+      
+      // Initial load for the default tab (User Management)
+      await loadUsersForManagement();
+      
+      // Initial call to load SOP activities when the admin panel loads
+      await loadSOPActivitiesTable();
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
