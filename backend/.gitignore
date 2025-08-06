@@ -1,0 +1,9 @@
+# Ignore pycache and compiled files
+__pycache__/
+*.pyc
+
+# Ignore local MongoDB data directory
+mongo-data/
+
+# Ignore environment files
+.env

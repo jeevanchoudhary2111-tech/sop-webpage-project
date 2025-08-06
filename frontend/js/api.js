@@ -1,11 +1,8 @@
 // frontend/js/api.js
 class ApiClient {
     constructor() {
-        // Dynamically determine the API base URL
-        const protocol = window.location.protocol;
-        const hostname = window.location.hostname;
-        const port = hostname === 'localhost' || hostname === '127.0.0.1' ? '8000' : '8000';
-        this.baseURL = `${protocol}//${hostname}:${port}/api/v1`;
+
+        this.baseURL = `/api/v1`;
         this.token = localStorage.getItem('access_token');
     }
 
@@ -29,7 +26,12 @@ class ApiClient {
 
         return headers;
     }
-    
+
+     // NEW: User-accessible SOP Definition Management
+    async getAccessibleSOPDefinitions() {
+        return await this.request('/sop-definitions');
+    }  
+     
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         const config = {
@@ -66,6 +68,9 @@ class ApiClient {
     async login(username, password) {
         const response = await this.request('/login', {
             method: 'POST',
+            headers: { // Explicitly set headers here
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ username, password }),
         });
 

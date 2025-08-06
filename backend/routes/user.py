@@ -3,10 +3,10 @@ from fastapi import APIRouter, HTTPException, status, Depends, Form , Request
 from datetime import timedelta , datetime
 from models import (
     UserCreate, UserResponse, LoginUser, LoginResponse, Token,
-    SOPActivityCreate, SOPActivityResponse, SOPProgress,
-    MarkedDateCreate, MarkedDateResponse
+    SOPActivityCreate, SOPActivityResponse,
+    MarkedDateCreate, MarkedDateResponse , SOPDefinition
 )
-from database import get_user_collection, get_sop_activity_collection, get_marked_dates_collection
+from database import get_user_collection, get_sop_activity_collection, get_marked_dates_collection , get_sop_definition_collection
 from auth import (
     verify_password, 
     get_password_hash, 
@@ -133,6 +133,29 @@ async def get_profile(current_user: dict = Depends(get_current_active_user)):
         allowed_sops=current_user.get("allowed_sops", [])
 
     )
+
+@user_router.get("/sop-definitions", response_model=List[SOPDefinition])
+async def get_user_sop_definitions(current_user: dict = Depends(get_current_active_user)):
+    """Get SOP definitions accessible by the current user"""
+    try:
+        sop_definitions_collection = get_sop_definition_collection()
+        
+        if current_user.get("role") == "admin":
+            # Admins can see all SOP definitions
+            definitions = list(sop_definitions_collection.find({}).sort("display_name", 1))
+        else:
+            # Regular users see only allowed SOPs
+            allowed_sops = current_user.get("allowed_sops", [])
+            definitions = list(sop_definitions_collection.find({"sop_type": {"$in": allowed_sops}}).sort("display_name", 1))
+        
+        return [SOPDefinition(**d) for d in definitions]
+    except Exception as e:
+        logger.error(f"Error getting user SOP definitions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve SOP definitions"
+        )
+
 
 @user_router.put("/profile", response_model=dict)
 async def update_profile(

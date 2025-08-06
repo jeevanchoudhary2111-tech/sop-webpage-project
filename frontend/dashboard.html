@@ -605,7 +605,6 @@
           // Render SOP cards first, then filter them
           renderSOPCards();
           console.log("User allowed SOPs:", user.allowed_sops); 
-          filterSOPCards(user.allowed_sops);
         }
       } catch (error) {
         console.error('Failed to load user info:', error);
@@ -794,7 +793,7 @@
           console.log("Initializing dashboard..."); 
           try {
             // Fetch all SOP definitions using the correct API method
-            allSOPDefinitions = await api.getSOPTypesWithActivity();
+            allSOPDefinitions = await api.getAccessibleSOPDefinitions();
             console.log("Fetched SOP Definitions:", allSOPDefinitions); 
             
             // Then load user info, which will now render and filter cards
