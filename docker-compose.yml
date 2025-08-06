@@ -9,10 +9,10 @@ services:
       - ./mongo-data:/data/db
       - ./mongo-init:/docker-entrypoint-initdb.d:ro
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: $Mongo_PWD
-      MONGO_INITDB_DATABASE: appdb
-      TZ: Asia/Kolkata
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=${Mongo_PWD}
+      - MONGO_INITDB_DATABASE=appdb
+      - TZ=Asia/Kolkata
     networks:
       - app-network
     healthcheck:
@@ -31,22 +31,22 @@ services:
     ports:
       - "28000:8000"
     environment:
-      MONGO_HOST: mongo
-      MONGO_PORT: 27017
-      MONGO_USERNAME: admin
-      MONGO_PASSWORD: $Mongo_PWD
-      MONGO_DB_NAME: appdb
-      SECRET_KEY: your-super-secret-key-change-in-production
-      ALLOWED_ORIGINS: "http://192.168.0.209:48080"
-      TZ: Asia/Kolkata
-      PYTHONUNBUFFERED: 1
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_USERNAME=admin
+      - MONGO_PASSWORD=${Mongo_PWD}
+      - MONGO_DB_NAME=appdb
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_ORIGINS="http://192.168.0.209:48080"
+      - TZ=Asia/Kolkata
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./frontend:/app/frontend
       - ./backup-data:/app/backups
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://192.168.0.209:48080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -65,13 +65,11 @@ services:
     networks:
       - app-network
     environment:
-      TZ: Asia/Kolkata
+      - TZ=Asia/Kolkata
 
 volumes:
   mongo-data:
-    driver: local
   backup-data:
-    driver: local
 
 networks:
   app-network:
