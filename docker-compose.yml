@@ -37,7 +37,7 @@ services:
       - MONGO_PASSWORD=${Mongo_PWD}
       - MONGO_DB_NAME=appdb
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_ORIGINS="http://192.168.0.209:48080"
+      - ALLOWED_ORIGINS="https://sop-tracker.kivicapital.net:1443"
       - TZ=Asia/Kolkata
       - PYTHONUNBUFFERED=1
     volumes:
@@ -58,8 +58,9 @@ services:
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/ssl/certs/kivicapital:/etc/nginx/ssl
     ports:
-      - "48080:80"
+      - "1443:443"
     depends_on:
       - backend
     networks:
