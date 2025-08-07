@@ -327,7 +327,7 @@ async def create_user(
             "username": user_data.username,
             "name": user_data.name,
             "email": user_data.email,
-            "password": get_password_hash("admin123"),
+            "password": get_password_hash(user_data.password),
             "role": "user",
             "is_active": True,
             "shift": user_data.shift,
