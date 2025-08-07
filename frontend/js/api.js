@@ -34,9 +34,19 @@ class ApiClient {
      
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
+
+        // Start with default headers from getHeaders()
+        const headers = this.getHeaders(); // This will initially include 'Content-Type': 'application/json'
+
+        // If the request body is FormData, remove the Content-Type header
+        // to allow the browser to set the correct 'multipart/form-data' header automatically.
+        if (options.body instanceof FormData) {
+            delete headers['Content-Type'];
+        }
+
         const config = {
-            headers: this.getHeaders(),
-            ...options,
+            headers: headers, // Use the potentially modified headers
+            ...options,      // Spread other options, which might include the 'body'
         };
 
         console.log('Making API request to:', url);
@@ -54,7 +64,18 @@ class ApiClient {
 
             if (!response.ok) {
                 console.error('API request failed:', response.status, data);
-                throw new Error(data.detail || 'Request failed');
+                let errorMessage = 'Request failed';
+                if (data && data.detail) {
+                    if (Array.isArray(data.detail)) {
+                        errorMessage = data.detail.map(err => {
+                            const loc = err.loc ? err.loc.join('.') : 'unknown';
+                            return `${loc}: ${err.msg}`;
+                        }).join('; ');
+                    } else if (typeof data.detail === 'string') {
+                        errorMessage = data.detail;
+                    }
+                }
+                throw new Error(errorMessage);
             }
 
             return data;
@@ -122,6 +143,11 @@ class ApiClient {
             body: formData,
         });
     }
+    
+    // NEW: User-accessible SOP Definition Management
+    async getAccessibleSOPDefinitions() {
+        return await this.request('/sop-definitions');
+    }
 
     // Admin methods
     async getUsers() {
@@ -155,7 +181,6 @@ class ApiClient {
         
         return await this.request('/reset-password', {
             method: 'POST',
-            headers: {}, // Let browser set content-type for FormData
             body: formData,
         });
     }
