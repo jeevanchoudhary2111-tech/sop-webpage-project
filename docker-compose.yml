@@ -22,7 +22,7 @@ services:
       retries: 3
 
   backend:
-    image: 192.168.0.155:15050/devops/commonlibs/sop-backend:v1
+    image: 192.168.0.155:15050/devops/commonlibs/sop-backend:latest
     container_name: backend
     restart: unless-stopped
     depends_on:
