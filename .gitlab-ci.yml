@@ -1,0 +1,28 @@
+stages:
+  - docker_build
+
+build_docker_image:
+  tags:
+    - "container_registry_build_runner"
+  stage: docker_build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always 
+    - when: never 
+  script:
+    - |
+      IMAGE_URL="192.168.0.155:15050/devops/commonlibs/sop-backend"
+      DATE_TAG=$(date +%Y%m%d)
+
+      echo "Starting Docker build for $IMAGE_URL:v$DATE_TAG..."
+      docker build --label version=v$DATE_TAG -t $IMAGE_URL:v$DATE_TAG -f $DOCKERFILE_PATH .
+      docker tag $IMAGE_URL:v$DATE_TAG $IMAGE_URL:latest
+      docker push $IMAGE_URL:v$DATE_TAG
+      docker push $IMAGE_URL:latest
+      docker image rmi $IMAGE_URL:v$DATE_TAG $IMAGE_URL:latest
