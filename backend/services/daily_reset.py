@@ -217,7 +217,7 @@ class DailyResetService:
             reports_collection = db["daily_reports"]
             
             report_data = {
-                "report_date": start_time.strftime("%Y-%m-%d"),,
+                "report_date": start_time.date(),
                 "generated_at": datetime.utcnow(),
                 "activity_count": len(activities),
                 "unique_users": len(set(a["username"] for a in activities)),
