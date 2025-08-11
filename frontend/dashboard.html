@@ -89,28 +89,8 @@
 
       <!-- SOPs Tab Content -->
       <div id="sops-content" class="tab-content active p-6">
-        <!-- Trading SOPs Section -->
-        <div class="mb-8">
-          <div class="flex items-center mb-4">
-            <div class="bg-gradient-to-r from-green-500 to-emerald-500 w-1 h-6 rounded-full mr-3"></div>
-            <h3 class="text-xl font-bold text-gray-900">📈 Trading SOPs</h3>
-          </div>
-          <div id="tradingSOPsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- SOP cards will be dynamically loaded here -->
-            <p id="loadingSOPs" class="text-gray-500">Loading SOPs...</p>
-          </div>
-        </div>
-
-        <!-- Infrastructure Section -->
-        <div class="mb-6">
-          <div class="flex items-center mb-4">
-            <div class="bg-gradient-to-r from-yellow-500 to-amber-500 w-1 h-6 rounded-full mr-3"></div>
-            <h3 class="text-xl font-bold text-gray-900">🔧 Infrastructure SOPs</h3>
-          </div>
-          <div id="infraSOPsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- SOP cards will be dynamically loaded here -->
-          </div>
-        </div>
+        <!-- SOP sections will be dynamically loaded here -->
+        <p id="loadingSOPs" class="text-gray-500">Loading SOPs...</p>
       </div>
 
       <!-- Shared Calendar Tab Content -->
@@ -506,59 +486,105 @@
       }
     });
 
+    // Define SOP categories and their display properties
+    const sopToCategoryMap = {
+      'gift_sop': 'trading',
+      'mcx_sop': 'trading',
+      'mcx_position_sop': 'trading',
+      'bse_daily_files_sop': 'trading',
+      'us_position_sop': 'trading',
+      'gift_infra_sop': 'infrastructure',
+      'lease_line_sop': 'infrastructure',
+      // Add more mappings as needed
+    };
+
+    const categoryDisplayProps = {
+      'trading': {
+        displayName: '📈 Trading SOPs',
+        icon: '📈',
+        gradientFrom: 'from-green-500',
+        gradientTo: 'to-emerald-500'
+      },
+      'infrastructure': {
+        displayName: '🔧 Infrastructure SOPs',
+        icon: '🏗️',
+        gradientFrom: 'from-yellow-500',
+        gradientTo: 'to-amber-500'
+      },
+      'other': { // Fallback category
+        displayName: '📋 Other SOPs',
+        icon: '📋',
+        gradientFrom: 'from-blue-500',
+        gradientTo: 'to-indigo-500'
+      }
+    };
+
     // Function to render SOP cards dynamically
     function renderSOPCards() {
       console.log("Rendering SOP cards. Definitions:", allSOPDefinitions);
-      const tradingContainer = document.getElementById('tradingSOPsContainer');
-      const infraContainer = document.getElementById('infraSOPsContainer');
+      const sopsContent = document.getElementById('sops-content');
       const loadingSOPs = document.getElementById('loadingSOPs');
       
       // Clear existing content and remove loading message
-      tradingContainer.innerHTML = '';
-      infraContainer.innerHTML = '';
+      sopsContent.innerHTML = '';
       if (loadingSOPs) loadingSOPs.remove();
 
       if (allSOPDefinitions.length === 0) {
-        tradingContainer.innerHTML = '<p class="text-gray-500">No SOPs defined yet. Please contact your administrator.</p>';
+        sopsContent.innerHTML = '<p class="text-gray-500">No SOPs defined yet. Please contact your administrator.</p>';
         return;
       }
 
+      const renderedCategorySections = {}; // To keep track of created section divs
+
       allSOPDefinitions.forEach(sop => {
-        // Change this from a div to an anchor tag
+        const categoryKey = sopToCategoryMap[sop.sop_type] || 'other';
+        const categoryProps = categoryDisplayProps[categoryKey];
+
+        // Create section and grid if not already created for this category
+        if (!renderedCategorySections[categoryKey]) {
+          const sectionDiv = document.createElement('div');
+          sectionDiv.className = 'mb-8';
+
+          const headerDiv = document.createElement('div');
+          headerDiv.className = 'flex items-center mb-4';
+          headerDiv.innerHTML = `
+            <div class="bg-gradient-to-r ${categoryProps.gradientFrom} ${categoryProps.gradientTo} w-1 h-6 rounded-full mr-3"></div>
+            <h3 class="text-xl font-bold text-gray-900">${categoryProps.displayName}</h3>
+          `;
+          sectionDiv.appendChild(headerDiv);
+
+          const cardsGridDiv = document.createElement('div');
+          cardsGridDiv.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+          sectionDiv.appendChild(cardsGridDiv);
+
+          sopsContent.appendChild(sectionDiv);
+          renderedCategorySections[categoryKey] = cardsGridDiv; // Store reference to the grid div
+        }
+
+        // Create the SOP card link
         const sopCardLink = document.createElement('a');
         sopCardLink.href = `${sop.sop_type}.html`; // Set the link target
         sopCardLink.className = 'block bg-white rounded-lg shadow-sm border border-gray-100 p-4 card-hover'; // Apply card styling and hover to the link itself
         sopCardLink.setAttribute('data-sop-type', sop.sop_type); // Keep data attribute for filtering
 
         // Determine icon and colors based on SOP type (you can expand this logic)
-        let icon = '📋';
-        let gradientFrom = 'from-blue-500';
-        let gradientTo = 'to-indigo-500';
+        let icon = categoryProps.icon; // Default to category icon
+        let gradientFrom = categoryProps.gradientFrom;
+        let gradientTo = categoryProps.gradientTo;
 
+        // Override icon/gradient if specific SOP type has a unique one
         if (sop.sop_type.includes('gift')) {
           icon = '📈';
-          gradientFrom = 'from-green-500';
-          gradientTo = 'to-emerald-500';
         } else if (sop.sop_type.includes('mcx')) {
           icon = '📊';
-          gradientFrom = 'from-orange-500';
-          gradientTo = 'to-red-500';
         } else if (sop.sop_type.includes('bse')) {
           icon = '📂';
-          gradientFrom = 'from-blue-500';
-          gradientTo = 'to-indigo-500';
         } else if (sop.sop_type.includes('us_position')) {
           icon = '🇺🇸';
-          gradientFrom = 'from-purple-500';
-          gradientTo = 'to-indigo-500';
         } else if (sop.sop_type.includes('lease_line')) {
           icon = '📡';
-          gradientFrom = 'from-yellow-500';
-          gradientTo = 'to-amber-500';
         } else if (sop.sop_type.includes('infra')) {
           icon = '🏗️';
-          gradientFrom = 'from-emerald-500';
-          gradientTo = 'to-teal-500';
         }
 
         sopCardLink.innerHTML = `
@@ -578,15 +604,8 @@
           </div>
         `;
 
-        // Categorize into containers
-        if (sop.sop_type.includes('gift') || sop.sop_type.includes('mcx') || sop.sop_type.includes('bse') || sop.sop_type.includes('us_position')) {
-          tradingContainer.appendChild(sopCardLink); // Append the link element
-        } else if (sop.sop_type.includes('infra') || sop.sop_type.includes('lease_line')) {
-          infraContainer.appendChild(sopCardLink); // Append the link element
-        } else {
-          // Fallback for uncategorized SOPs, maybe add to trading or a new 'Other' section
-          tradingContainer.appendChild(sopCardLink); // Append the link element
-        }
+        // Append the card to the correct category's grid
+        renderedCategorySections[categoryKey].appendChild(sopCardLink);
       });
     }
 
