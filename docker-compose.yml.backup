@@ -22,7 +22,7 @@ services:
       retries: 3
 
   backend:
-    build:
+    image: build:
       context: .
       dockerfile: dockerfile
     container_name: backend
@@ -31,7 +31,7 @@ services:
       mongo:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "28000:8000"
     environment:
       - MONGO_HOST=mongo
       - MONGO_PORT=27017
@@ -39,7 +39,7 @@ services:
       - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_DB_NAME=appdb
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_ORIGINS=http://localhost:8080,http://192.168.0.155:8080
+      - ALLOWED_ORIGINS="https://sop-tracker.kivicapital.net:1443"
       - TZ=Asia/Kolkata
       - PYTHONUNBUFFERED=1
     volumes:

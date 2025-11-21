@@ -27,7 +27,7 @@ app.add_middleware(
 # Include routers
 app.include_router(user_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1/admin")
-app.include_router(gift_position_router)
+app.include_router(gift_position.router)
 
 # Mount static files (frontend)
 #app.mount("/", StaticFiles(directory="frontend", html=True), name="static")

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MCX Position Matching SOP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-5xl mx-auto py-6 px-4">
+    <!-- Save Button (Fixed Position) -->
+    <div class="fixed top-4 right-4 z-50">
+      <button 
+        id="saveButton" 
+        onclick="saveProgress()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        disabled
+      >
+        💾 Save Progress
+      </button>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+      <a href="dashboard.html" class="text-blue-600 hover:underline font-semibold">🏠 Back to Dashboard</a>
+      <span class="text-sm text-gray-600">⏱️ Last updated: <time datetime="2025-07-22">July 22, 2025</time></span>
+    </div>
+
+    <h1 class="text-3xl font-bold text-blue-700 text-center mb-8">📸 MCX Position Matching SOP</h1>
+
+    <!-- Pre-9:30 Checks -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">✅ Logit Status</h2>
+      <ul class="space-y-2">
+        <li>
+          <label class="flex items-center p-2 rounded-lg transition-colors duration-200">
+            <input type="checkbox" class="mr-3 sop-task" data-task-id="logit_ledger_completed" data-description="Logit Ledger Completed"> 
+            Logit Ledger Completed
+            <span class="completion-info ml-auto text-xs text-gray-500"></span>
+          </label>
+        </li>
+        <li>
+          <label class="flex items-center p-2 rounded-lg transition-colors duration-200">
+            <input type="checkbox" class="mr-3 sop-task" data-task-id="logit_started" data-description="Logit Started"> 
+            Logit Started
+            <span class="completion-info ml-auto text-xs text-gray-500"></span>
+          </label>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Snapshot Timing Table -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🕒 Snapshot Checks</h2>
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full text-sm border border-gray-300">
+          <thead class="bg-blue-100">
+            <tr>
+              <th class="border px-3 py-2">Time</th>
+              <th class="border px-3 py-2">OMS</th>
+              <th class="border px-3 py-2">Live Sheet</th>
+              <th class="border px-3 py-2">CTCL</th>
+            </tr>
+          </thead>
+          <tbody id="snapshot-table-body">
+            <!-- Table rows will be dynamically generated here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Final Position Check -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Final Position Match</h2>
+      <label class="flex items-center p-2 rounded-lg transition-colors duration-200">
+        <input type="checkbox" class="mr-3 sop-task" data-task-id="final_position_match" data-description="Position matched with TCSbancs"> 
+        Position matched with <b>TCSbancs</b>
+        <span class="completion-info ml-auto text-xs text-gray-500"></span>
+      </label>
+    </section>
+    <footer class="text-center text-sm text-gray-500 mt-8">
+      🧾 Stay sharp and cross-verify position diligently! ✅
+    </footer>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check authentication
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    let pendingChanges = new Set();
+    let lockedTasks = new Set();
+    let savedTasks = new Set();
+
+    // Function to dynamically generate the snapshot table
+    function generateSnapshotTable() {
+      const timeSlots = ["9:30 AM", "11:30 AM", "1:30 PM", "3:30 PM", "5:30 PM", "7:30 PM", "9:30 PM", "11:00 PM"];
+      const categories = ["oms", "live", "ctcl"];
+      const options = [
+        { value: "match", label: "Match" },
+        { value: "unmatch", label: "Unmatch" },
+        { value: "no_trade", label: "No Trade" }
+      ];
+
+      const tableBody = document.getElementById("snapshot-table-body");
+      let html = '';
+
+      timeSlots.forEach(time => {
+        const normalizedTime = time.replace(/[:\s]/g, '').toLowerCase(); // e.g., "9:30 AM" -> "930am"
+        html += `<tr><td class="border px-3 py-2">${time}</td>`;
+
+        categories.forEach(category => {
+          html += `<td class="border px-3 py-2">`;
+          options.forEach(option => {
+            const taskId = `${category}_${normalizedTime}_${option.value}`;
+            const radioName = `${category}_${normalizedTime}`;
+            html += `
+              <label class="flex items-center">
+                <input type="radio" name="${radioName}" class="mr-1 sop-task" data-task-id="${taskId}" data-description="${category.toUpperCase()} ${time} ${option.label}">
+                ${option.label}
+                <span class="completion-info ml-auto text-xs text-gray-500"></span>
+              </label>
+            `;
+          });
+          html += `</td>`;
+        });
+        html += `</tr>`;
+      });
+      tableBody.innerHTML = html;
+    }
+
+    // Load saved and locked tasks with completion info
+    async function loadTaskStatus() {
+      try {
+        // Get today's activities for this SOP type to show who completed what
+        const allActivities = await api.getTodaySOPActivities('mcx_position_sop');
+        
+        const activities = await api.getUserSOPActivities('mcx_position_sop');
+        const completedTaskIds = new Set(activities.map(activity => activity.task_id));
+        
+        // Get locked tasks from other users
+        const progressResponse = await api.getSOPProgress('mcx_position_sop');
+        lockedTasks = new Set(progressResponse.locked_tasks || []);
+        savedTasks = new Set(completedTaskIds);
+        
+        document.querySelectorAll('.sop-task').forEach(input => {
+          const taskId = input.getAttribute('data-task-id');
+          const label = input.parentElement;
+          const completionInfo = label.querySelector('.completion-info');
+          
+          if (savedTasks.has(taskId)) {
+            input.checked = true;
+            input.disabled = true;
+            label.classList.add('opacity-75', 'bg-green-100');
+            label.title = 'Task completed and saved';
+            
+            // Show who completed it and when
+            const activity = allActivities.find(a => a.task_id === taskId);
+            if (activity && completionInfo) {
+              const completedTime = new Date(activity.completed_at).toLocaleString();
+              completionInfo.textContent = `✓ ${activity.username} at ${completedTime}`;
+            }
+          } else if (lockedTasks.has(taskId)) {
+            input.disabled = true;
+            label.classList.add('opacity-50', 'bg-red-100');
+            label.title = 'Task locked by another user';
+            
+            // Show who locked it
+            const activity = allActivities.find(a => a.task_id === taskId);
+            if (activity && completionInfo) {
+              const completedTime = new Date(activity.completed_at).toLocaleString();
+              completionInfo.textContent = `🔒 ${activity.username} at ${completedTime}`;
+            }
+          }
+        });
+
+      } catch (error) {
+        console.error('Failed to load task status:', error);
+      } finally {
+        updateSaveButton(); // Ensure save button state is correct after loading
+      }
+    }
+
+    // Handle checkbox and radio button changes
+    document.addEventListener('change', function(event) {
+      if (event.target.classList.contains('sop-task')) {
+        const input = event.target;
+        const taskId = input.getAttribute('data-task-id');
+        
+        if (input.checked) { // Only add to pending if checked
+          pendingChanges.add(taskId);
+          input.parentElement.classList.add('bg-yellow-100');
+          input.parentElement.title = 'Pending save';
+        } else { // If unchecked, remove from pending
+          pendingChanges.delete(taskId);
+          input.parentElement.classList.remove('bg-yellow-100');
+          input.parentElement.title = '';
+        }
+        
+        updateSaveButton();
+      }
+    });
+
+    function updateSaveButton() {
+      const hasCheckedTasks = pendingChanges.size > 0;
+
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = !hasCheckedTasks;
+    }
+
+    // Save progress function
+    async function saveProgress() {
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      saveButton.textContent = '💾 Saving...';
+      
+      try {
+        const tasksToSave = Array.from(pendingChanges);
+        
+        for (const taskId of tasksToSave) {
+          const input = document.querySelector(`[data-task-id="${taskId}"]`);
+          if (input && input.checked) { // Ensure it's still checked before saving
+            const taskDescription = input.getAttribute('data-description');
+            await api.logSOPActivity('mcx_position_sop', taskId, taskDescription);
+            
+            // Lock the task
+            input.disabled = true;
+            input.parentElement.classList.remove('bg-yellow-100');
+            input.parentElement.classList.add('opacity-75', 'bg-green-100');
+            input.parentElement.title = 'Task completed and saved';
+            
+            // Show completion info
+            const completionInfo = input.parentElement.querySelector('.completion-info');
+            if (completionInfo) {
+              const now = new Date().toLocaleString();
+              const username = api.getCurrentUser()?.username || 'You';
+              completionInfo.textContent = `✓ ${username} at ${now}`;
+            }
+          }
+        }
+        
+        pendingChanges.clear();
+        saveButton.textContent = '✅ Saved!';
+        
+        setTimeout(() => {
+          saveButton.textContent = '💾 Save Progress';
+          updateSaveButton(); // Re-evaluate button state after save
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+        alert('Failed to save progress. Please try again.');
+        saveButton.disabled = false;
+        saveButton.textContent = '💾 Save Progress';
+      }
+    }
+
+    // Initialize
+    generateSnapshotTable(); // Generate the table first
+    loadTaskStatus();
+  </script>
+</body>
+</html>

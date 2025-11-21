@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GIFT SOP Checklist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-5xl mx-auto py-6 px-4">
+    <!-- Save Button (Fixed Position) -->
+    <div class="fixed top-4 right-4 z-50">
+      <button 
+        id="saveButton" 
+        onclick="saveProgress()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+        disabled
+      >
+        💾 Save Progress
+      </button>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+      <a href="dashboard.html" class="text-blue-600 hover:underline font-semibold">🏠 Back to Dashboard</a>
+      <span class="text-sm text-gray-600">⏱️ Last updated: <time datetime="2025-07-22">July 22, 2025</time></span>
+    </div>
+
+    <h1 class="text-3xl font-bold text-blue-700 text-center mb-8">📋 GIFT SOP Checklist</h1>
+
+    <!-- Other SOP sections remain unchanged -->
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">⚙️ GIFT Infra</h2>
+      <ul class="list-disc ml-6 space-y-2 text-gray-700">
+        <li><b>Step 1: Restart the Token</b>
+          <ul class="ml-6 space-y-2">
+            <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_token_restart" data-description="Initiate a token restart from Ansible AWX">Initiate a token restart from Ansible AWX</label></li>
+            <li class="list-disc ml-6 text-blue-600"><a href="http://192.168.0.197/#/home" target="_blank" class="underline">Ansible AWX</a></li>
+          </ul>
+        </li>
+        <li><b>Step 2: Restart the Watchdog</b>
+          <ul class="ml-6 space-y-2">
+            <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_watchdog_restart" data-description="Restart the Watchdog service once the token is ready">Restart the Watchdog service once the token is ready</label></li>
+            <li class="list-disc ml-6 text-blue-600"><a href="http://192.168.30.15:8099/home" target="_blank" class="underline">Airflow</a></li>
+          </ul>
+        </li>
+        <li><b>Step 3: Restart the Slave</b>
+          <ul class="ml-6 space-y-2">
+            <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_slave_mark_failed" data-description="If slave DAG failed and cluster/watchdog is green, mark them failed manually">If slave DAG failed and cluster/watchdog is green, mark them failed manually</label></li>
+            <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_clear_dag_tasks" data-description="Click Watchdog DAG → Clear Task → Do same for Slave DAG">Click Watchdog DAG → Clear Task → Do same for Slave DAG</label></li>
+            <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_check_logs" data-description="Check logs: Timestamp should reach latest (e.g., 07:28 if current is 10:28)">Check logs: Timestamp should reach latest (e.g., 07:28 if current is 10:28)</label></li>
+            <li class="list-disc ml-6 text-blue-600"><a href="http://192.168.0.177:3003/d/GIFT_PRODUCTION/gift?orgId=1" target="_blank" class="underline">GIFT Logs</a></li>
+          </ul>
+        </li>
+        <li><b>Step 4: Start the Cluster</b>
+          <ul class="ml-6 space-y-2">
+            <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_start_cluster" data-description="Once logs confirm everything is in place, start the cluster">Once logs confirm everything is in place, start the cluster</label></li>
+            <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_verify_status" data-description="Cluster, Watchdog, Slave should be light green">Cluster, Watchdog, Slave should be light green</label></li>
+          </ul>
+        </li>
+        <li><label class="flex items-center"><input type="checkbox" class="mr-2 sop-task" data-task-id="gift_system_normal" data-description="If all steps complete, the system should be back to normal">✅ If all steps complete, the system should be back to normal</label></li>
+      </ul>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">🔗 Links & Tools</h2>
+      <ul class="list-disc ml-6 text-blue-600 space-y-1">
+        <li><a href="http://192.168.0.121:8083" target="_blank">Airflow (gift): 192.168.0.121:8083</a></li>
+        <li><a href="http://192.168.30.15:18080" target="_blank">Airflow (startDatasnap): 192.168.30.15:18080</a></li>
+        <li><a href="http://192.168.30.15:8099" target="_blank">Airflow (Balte): 192.168.30.15:8099</a></li>
+        <li><a href="#" target="_blank">📨 Google Spaces: Gspace</a></li>
+      </ul>
+    </section>
+
+    <footer class="text-center text-sm text-gray-500 mt-8">
+      🎯 You're doing great! Keep crushing your SOPs like a pro! 🚀
+    </footer>
+
+    <!-- Progress Status Modal -->
+    <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Save Progress</h3>
+            <button onclick="hideProgressModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div id="progressContent">
+            <!-- Progress content will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Check authentication
+    if (!api.isAuthenticated()) {
+      window.location.href = 'index.html';
+    }
+
+    let pendingChanges = new Set();
+    let lockedTasks = new Set();
+    let savedTasks = new Set();
+
+    // Load saved and locked tasks with completion info
+    async function loadTaskStatus() {
+      try {
+        // Get today's activities for this SOP type to show who completed what
+        const allActivities = await api.getTodaySOPActivities('gift_infra_sop');
+        
+        const activities = await api.getUserSOPActivities('gift_infra_sop');
+        const completedTaskIds = new Set(activities.map(activity => activity.task_id));
+        
+        // Get locked tasks from other users
+        const progressResponse = await api.getSOPProgress('gift_infra_sop');
+        lockedTasks = new Set(progressResponse.locked_tasks || []);
+        savedTasks = new Set(completedTaskIds);
+        
+        document.querySelectorAll('.sop-task').forEach(checkbox => {
+          const taskId = checkbox.getAttribute('data-task-id');
+          const label = checkbox.parentElement;
+          
+          if (savedTasks.has(taskId)) {
+            checkbox.checked = true;
+            checkbox.disabled = true;
+            label.classList.add('opacity-75', 'bg-green-100');
+            label.title = 'Task completed and saved';
+          } else if (lockedTasks.has(taskId)) {
+            checkbox.disabled = true;
+            label.classList.add('opacity-50', 'bg-red-100');
+            label.title = 'Task locked by another user';
+          }
+
+          // Find who completed this task and show completion info
+          const taskActivity = allActivities.find(activity => activity.task_id === taskId);
+          if (taskActivity) {
+            const completedTime = new Date(taskActivity.completed_at).toLocaleString('en-IN', {
+              timeZone: 'Asia/Kolkata',
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            // Add completion info
+            const completionInfo = document.createElement('div');
+            completionInfo.className = 'text-xs text-gray-600 mt-1';
+            completionInfo.innerHTML = `✅ Completed by <strong>${taskActivity.username}</strong> at ${completedTime}`;
+            label.appendChild(completionInfo);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load task status:', error);
+      }
+    }
+
+    // Handle checkbox changes
+    document.addEventListener('change', function(event) {
+      if (event.target.classList.contains('sop-task')) {
+        const checkbox = event.target;
+        const taskId = checkbox.getAttribute('data-task-id');
+        
+        if (checkbox.checked) {
+          pendingChanges.add(taskId);
+          checkbox.parentElement.classList.add('bg-yellow-100');
+          checkbox.parentElement.title = 'Pending save';
+        } else {
+          pendingChanges.delete(taskId);
+          checkbox.parentElement.classList.remove('bg-yellow-100');
+          checkbox.parentElement.title = '';
+        }
+        
+        // Enable/disable save button
+        document.getElementById('saveButton').disabled = pendingChanges.size === 0;
+      }
+    });
+
+    // Save progress function
+    async function saveProgress() {
+      if (pendingChanges.size === 0) return;
+      
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      saveButton.textContent = '💾 Saving...';
+      
+      try {
+        const tasksToSave = Array.from(pendingChanges);
+        
+        for (const taskId of tasksToSave) {
+          const checkbox = document.querySelector(`[data-task-id="${taskId}"]`);
+          if (checkbox && checkbox.checked) {
+            const taskDescription = checkbox.getAttribute('data-description');
+            await api.logSOPActivity('gift_infra_sop', taskId, taskDescription);
+            
+            // Lock the task
+            checkbox.disabled = true;
+            checkbox.parentElement.classList.remove('bg-yellow-100');
+            checkbox.parentElement.classList.add('opacity-75', 'bg-green-100');
+            checkbox.parentElement.title = 'Task completed and saved';
+            savedTasks.add(taskId);
+          }
+        }
+        
+        pendingChanges.clear();
+        showProgressModal('✅ Progress saved successfully!', 'success');
+        
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+        showProgressModal('❌ Failed to save progress. Please try again.', 'error');
+      } finally {
+        saveButton.disabled = true;
+        saveButton.textContent = '💾 Save Progress';
+      }
+    }
+
+    function showProgressModal(message, type) {
+      const content = document.getElementById('progressContent');
+      const bgColor = type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+      
+      content.innerHTML = `
+        <div class="p-4 rounded-lg ${bgColor}">
+          <p class="text-center font-medium">${message}</p>
+        </div>
+        <div class="mt-4 text-center">
+          <button onclick="hideProgressModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            Close
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('progressModal').classList.remove('hidden');
+      
+      // Auto-hide success messages
+      if (type === 'success') {
+        setTimeout(hideProgressModal, 2000);
+      }
+    }
+
+    function hideProgressModal() {
+      document.getElementById('progressModal').classList.add('hidden');
+    }
+
+    // Initialize
+    loadTaskStatus();
+  </script>
+</body>
+</html>

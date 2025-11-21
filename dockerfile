@@ -1,4 +1,4 @@
-FROM 192.168.0.155:15050/devops/commonlibs/python:3.11-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 

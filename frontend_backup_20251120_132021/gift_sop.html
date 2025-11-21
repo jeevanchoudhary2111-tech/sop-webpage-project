@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIFT Position Checklist</title>
+    <title>GIFT SOP Checklist</title>
     <style>
         * {
             margin: 0;
@@ -196,11 +196,11 @@
         </a>
     </div>
 
-    <h1 class="page-title">📋 GIFT Position Checklist</h1>
+    <h1 class="page-title">📋 GIFT SOP Checklist</h1>
 
     <div class="section-header">
         <span style="font-size: 24px;">⚙️</span>
-        <h2>GIFT Position Checks (6:30 AM - 2:45 AM)</h2>
+        <h2>GIFT Checks (6:30 AM - 2:45 AM)</h2>
     </div>
 
     <div class="table-container">
@@ -227,13 +227,19 @@
         const API_BASE = 'http://localhost:8000';
         let authToken = localStorage.getItem('auth_token');
 
+        // Check if user is logged in
         if (!authToken) {
             console.warn('No auth token found. Using localStorage fallback.');
         }
 
+        // Generate time slots with custom schedule
         function generateTimeSlots() {
             const tbody = document.getElementById('checklistBody');
+            
+            // Morning session: 6:30 AM to 3:30 PM (every 30 minutes)
             generateSession(tbody, 6, 30, 15, 30);
+            
+            // Evening/Night session: 4:30 PM to 2:45 AM next day (every 30 minutes)
             generateSession(tbody, 16, 30, 26, 45);
         }
 
@@ -308,9 +314,12 @@
             return tr;
         }
 
+        // Handle input change - try API first, fallback to localStorage
         async function handleInputChange(input) {
+            // Always save to localStorage immediately
             saveToLocalStorage();
             
+            // Try to save to API if we have auth token
             if (authToken) {
                 try {
                     await saveToDatabase(input);
@@ -320,6 +329,7 @@
             }
         }
 
+        // Save to database via API
         async function saveToDatabase(input) {
             const time = input.dataset.time;
             const timeId = input.id.split('_').slice(1).join('_');
@@ -335,7 +345,7 @@
                 matched: matchedCheckbox.checked
             };
             
-            const response = await fetch(`${API_BASE}/api/v1/gift-position/checks`, {
+            const response = await fetch(`${API_BASE}/api/v1/gift/checks`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -351,6 +361,7 @@
             console.log('Saved to database successfully');
         }
 
+        // Save to localStorage
         function saveToLocalStorage() {
             const inputs = document.querySelectorAll('input[type="number"], input[type="checkbox"]');
             const data = {};
@@ -363,13 +374,15 @@
                 }
             });
             
-            localStorage.setItem('giftPositionProgress', JSON.stringify(data));
+            localStorage.setItem('giftSopProgress', JSON.stringify(data));
         }
 
+        // Load data on page load
         async function loadTodayData() {
+            // Try to load from API first
             if (authToken) {
                 try {
-                    const response = await fetch(`${API_BASE}/api/v1/gift-position/checks/today`, {
+                    const response = await fetch(`${API_BASE}/api/v1/gift/checks/today`, {
                         headers: {
                             'Authorization': `Bearer ${authToken}`
                         }
@@ -386,9 +399,11 @@
                 }
             }
             
+            // Fallback to localStorage
             loadFromLocalStorage();
         }
 
+        // Apply data to inputs (from API)
         function applyDataToInputs(checks) {
             checks.forEach(check => {
                 const time = check.time;
@@ -408,8 +423,9 @@
             });
         }
 
+        // Load from localStorage
         function loadFromLocalStorage() {
-            const saved = localStorage.getItem('giftPositionProgress');
+            const saved = localStorage.getItem('giftSopProgress');
             if (saved) {
                 const data = JSON.parse(saved);
                 Object.keys(data).forEach(id => {
@@ -426,14 +442,17 @@
             }
         }
 
+        // Save button handler
         async function saveProgress() {
             const button = document.querySelector('.save-button');
             const originalText = button.innerHTML;
             button.innerHTML = '⏳ Saving...';
             button.disabled = true;
             
+            // Always save to localStorage
             saveToLocalStorage();
             
+            // Try to save to API if we have token
             if (authToken) {
                 try {
                     const times = new Set();
@@ -466,7 +485,7 @@
                             matched: matchedValue
                         };
                         
-                        await fetch(`${API_BASE}/api/v1/gift-position/checks`, {
+                        await fetch(`${API_BASE}/api/v1/gift/checks`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -494,6 +513,7 @@
             }, 2000);
         }
 
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             generateTimeSlots();
             loadTodayData();
