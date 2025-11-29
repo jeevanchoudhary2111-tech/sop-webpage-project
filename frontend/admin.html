@@ -900,7 +900,7 @@
             const lastActivity = sop.last_activity ? new Date(sop.last_activity).toLocaleDateString() : 'Never';
             html += `
               <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-                <h4 class="font-semibold text-gray-900 mb-2">${sop.display_name}</h4>
+                <h4 class="font-semibold text-gray-900 mb-2">${sop.name}</h4>
                 <p class="text-sm text-gray-600 mb-2">${sop.description || 'No description provided.'}</p>
                 <div class="text-sm text-gray-600 space-y-1">
                   <p>SOP ID: <span class="font-medium">${sop.sop_type}</span></p>
@@ -914,7 +914,7 @@
                   <button onclick="resetSOPType('${sop.sop_type}')" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-3 rounded text-sm transition duration-200">
                     Reset Data
                   </button>
-                  <button onclick="deleteSOPDefinition('${sop.id}', '${sop.display_name}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm transition duration-200">
+                  <button onclick="deleteSOPDefinition('${sop.id}', '${sop.name}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm transition duration-200">
                     Delete
                   </button>
                 </div>
@@ -933,7 +933,7 @@
           if (selectElement) {
             selectElement.innerHTML = '<option value="">All SOPs</option>';
             sopTypes.forEach(sop => {
-              selectElement.innerHTML += `<option value="${sop.sop_type}">${sop.display_name}</option>`;
+              selectElement.innerHTML += `<option value="${sop.sop_type}">${sop.name}</option>`;
             });
           }
         });
@@ -1007,9 +1007,10 @@
       const description = document.getElementById('sopDescription').value;
       
       const sopData = {
-        sop_type: sopType,
-        display_name: displayName,
-        description: description || null
+ 	 name: displayName,           // ← ADD THIS LINE
+ 	 sop_type: sopType,
+ 	 display_name: displayName,
+ 	 description: description || null
       };
 
       try {

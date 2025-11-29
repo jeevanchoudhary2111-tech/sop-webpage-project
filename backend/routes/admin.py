@@ -106,6 +106,22 @@ async def update_sop_definition(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update SOP definition"
         )
+@admin_router.get("/sop-definitions", response_model=List[SOPDefinition])
+async def get_all_sop_definitions(current_user: dict = Depends(require_admin)):
+    """Get all SOP definitions (admin only)"""
+    try:
+        sop_definitions_collection = get_sop_definition_collection()
+        
+        all_sop_definitions = list(sop_definitions_collection.find({}).sort("name", 1))
+        
+        return [SOPDefinition(**sop_def) for sop_def in all_sop_definitions]
+        
+    except Exception as e:
+        logger.error(f"Get SOP definitions error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve SOP definitions"
+        )
 
 @admin_router.delete("/sop-definitions/{sop_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_sop_definition(

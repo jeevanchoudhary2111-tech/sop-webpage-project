@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from datetime import datetime, date
-from ..models import GIFTPositionCheck, GIFTPositionCheckCreate, User
-from ..auth import get_current_user
-from ..database import get_database
+from models import GIFTPositionCheck, GIFTPositionCheckCreate, User
+from auth import get_current_user
+from database import get_db
 
 router = APIRouter(prefix="/api/v1/gift-position", tags=["GIFT Position"])
 
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/v1/gift-position", tags=["GIFT Position"])
 async def create_or_update_check(
     check_data: GIFTPositionCheckCreate,
     current_user: User = Depends(get_current_user),
-    db = Depends(get_database)
+    db = Depends(get_db)
 ):
     """Create or update a GIFT position check for a specific time slot"""
     today = date.today().isoformat()
@@ -61,7 +61,7 @@ async def create_or_update_check(
 @router.get("/checks/today", response_model=List[GIFTPositionCheck])
 async def get_today_checks(
     current_user: User = Depends(get_current_user),
-    db = Depends(get_database)
+    db = Depends(get_db)
 ):
     """Get all checks for today for the current user"""
     today = date.today().isoformat()
@@ -81,7 +81,7 @@ async def get_today_checks(
 async def get_checks_by_date(
     check_date: str,
     current_user: User = Depends(get_current_user),
-    db = Depends(get_database)
+    db = Depends(get_db)
 ):
     """Get all checks for a specific date"""
     cursor = db.gift_position_checks.find({
@@ -99,7 +99,7 @@ async def get_checks_by_date(
 @router.get("/admin/checks/all", response_model=List[GIFTPositionCheck])
 async def get_all_checks(
     current_user: User = Depends(get_current_user),
-    db = Depends(get_database)
+    db = Depends(get_db)
 ):
     """Get all checks (admin only)"""
     if current_user.role != "admin":
@@ -112,3 +112,5 @@ async def get_all_checks(
         check["id"] = str(check["_id"])
     
     return [GIFTPositionCheck(**check) for check in checks]
+
+gift_position_router = router

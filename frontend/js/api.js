@@ -2,7 +2,7 @@
 class ApiClient {
     constructor() {
 
-        this.baseURL = `/api/v1`;
+        this.baseURL = `http://localhost:8000/api/v1`;
         this.token = localStorage.getItem('access_token');
     }
 

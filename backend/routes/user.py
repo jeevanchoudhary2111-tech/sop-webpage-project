@@ -4,9 +4,9 @@ from datetime import timedelta , datetime
 from models import (
     UserCreate, UserResponse, LoginUser, LoginResponse, Token,
     SOPActivityCreate, SOPActivityResponse,
-    MarkedDateCreate, MarkedDateResponse , SOPDefinition
+    MarkedDateCreate, MarkedDateResponse, SOPDefinition, User
 )
-from database import get_user_collection, get_sop_activity_collection, get_marked_dates_collection , get_sop_definition_collection
+from database import get_user_collection, get_sop_activity_collection, get_marked_dates_collection, get_sop_definition_collection, get_db
 from auth import (
     verify_password, 
     get_password_hash, 
@@ -838,4 +838,102 @@ async def unmark_date(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to unmark date"
+        )
+# GIFT Position endpoints - copied from US Position structure
+@user_router.post("/sop/gift-position-data")
+async def save_gift_position_data(
+    data: dict,
+    current_user: dict = Depends(get_current_active_user)
+):
+    """Save GIFT Position form data"""
+    try:
+        from database import get_db
+        db = get_db()
+        gift_position_collection = db["gift_position_data"]
+
+        today = data.get("date", datetime.now().date().isoformat())
+        existing_doc = gift_position_collection.find_one({"date": today})
+        
+        if existing_doc:
+            merged_form_data = existing_doc.get("form_data", {})
+            
+            for field_key, field_data in data.get("form_data", {}).items():
+                if field_data.get("oms") or field_data.get("turnover") or field_data.get("matched"):
+                    merged_form_data[field_key] = {
+                        **field_data,
+                        "user_id": str(current_user["_id"]),
+                        "username": current_user["username"],
+                        "filled_at": datetime.now().isoformat()
+                    }
+            
+            gift_position_collection.update_one(
+                {"date": today},
+                {
+                    "$set": {
+                        "form_data": merged_form_data,
+                        "logit_work": data.get("logit_work", {}),
+                        "last_updated_at": datetime.now(),
+                        "last_updated_by": current_user["username"]
+                    }
+                }
+            )
+        else:
+            form_data_with_user = {}
+            for field_key, field_data in data.get("form_data", {}).items():
+                if field_data.get("oms") or field_data.get("turnover") or field_data.get("matched"):
+                    form_data_with_user[field_key] = {
+                        **field_data,
+                        "user_id": str(current_user["_id"]),
+                        "username": current_user["username"],
+                        "filled_at": datetime.now().isoformat()
+                    }
+            
+            document = {
+                "date": today,
+                "form_data": form_data_with_user,
+                "logit_work": data.get("logit_work", {}),
+                "created_at": datetime.now(),
+                "created_by": current_user["username"],
+                "last_updated_at": datetime.now(),
+                "last_updated_by": current_user["username"]
+            }
+            
+            gift_position_collection.insert_one(document)
+
+        return {"message": "GIFT Position data saved successfully"}
+
+    except Exception as e:
+        logger.error(f"Save GIFT Position data error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to save GIFT Position data"
+        )
+
+@user_router.get("/sop/gift-position-data")
+async def get_gift_position_data(current_user: dict = Depends(get_current_active_user)):
+    """Get GIFT Position form data for today"""
+    try:
+        from database import get_db
+        db = get_db()
+        gift_position_collection = db["gift_position_data"]
+
+        today = datetime.now().date().isoformat()
+        data = gift_position_collection.find_one({"date": today})
+
+        if data:
+            return {
+                "date": data["date"],
+                "form_data": data.get("form_data", {}),
+                "logit_work": data.get("logit_work", {}),
+                "last_updated_at": data.get("last_updated_at"),
+                "last_updated_by": data.get("last_updated_by")
+            }
+        else:
+            return {"form_data": {}, "logit_work": {}}
+
+    except Exception as e:
+        logger.error(f"Get GIFT Position data error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve GIFT Position data"
         )
